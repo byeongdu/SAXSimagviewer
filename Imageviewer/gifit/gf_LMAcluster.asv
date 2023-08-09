@@ -1,0 +1,18 @@
+function y = gf_LMAcluster(particle, cut, varargin)
+% y = [chi2, y] = gf_LMA(particle, cut, varargin)
+%
+%Written by Byeongdu Lee
+if nargin ==0
+    y=[];
+    return;
+end
+if strcmp(particle.Fq.name, 'none')
+    yfq = 1;
+else
+    varargin{1} = particle.layer;
+    if isfield(particle, 'zdep')
+        varargin{2} = particle.zdep;
+    end
+    yfq = feval(particle.Fq.name, particle.Fq.param, cut, particle.Sq.name, particle.Sq.param, varargin);
+end
+y = yfq(:);

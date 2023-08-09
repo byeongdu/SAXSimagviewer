@@ -1,0 +1,257 @@
+function sresult = gf_parameter(varargin)
+% gf_parameter(model.particle{1}.param)
+%   input should be a cell containing:
+%       name, value, LB, UB, and Hold of paramters, such as
+% md.particle{1}.param
+%
+%ans = 
+%    'R'     [     1]    [0.8000]    [1.2000]    [0]
+%    'dR'    [0.2000]    [0.8000]    [1.2000]    [1]
+%
+% Copyright 2007 Byeongdu Lee
+
+hFigGiparam = findall(0,'Tag','giparam');
+if isempty(hFigGiparam)
+    hFigGiparam = initFigure;
+else
+    figure(hFigGiparam);
+%    return;
+end
+
+if numel(varargin) == 1
+    val = varargin{1};
+    if iscell(val)
+        drawFigure(hFigGiparam, val);
+        setappdata(hFigGiparam,'data',val);
+    else
+        feval(val, hFigGiparam);
+    end
+elseif numel(varargin) == 3
+    val = varargin{1};
+    gifithandle = varargin{2};
+    numofparticle = varargin{3};
+    strCompnt = varargin{4};
+    drawFigure(hFigGiparam, val, gifithandle, numofparticle, strCompnt);
+    setappdata(hFigGiparam,'data',val);
+end
+
+
+%================================================================
+% --- initialize figure layout
+%================================================================
+function hFigGiparam = initFigure
+% --------------------------------
+% --- main figure handle
+% --------------------------------
+% set figure next to gifit.fig
+hFigGifit = findall(0,'Tag','gifit');
+posgifit = get(hFigGifit, 'position');
+hFigWidth   = 500;
+hFigHeight  = 331;
+hFigPos     = [...
+    posgifit(1)+posgifit(3)+5,...
+    posgifit(2)-hFigHeight+posgifit(4)-1,...
+    hFigWidth,hFigHeight];
+hFigGiparam = figure(...
+    'BackingStore','on',...
+    'Units','pixels',...
+    'DockControls','off',...
+    'Resize','on',...
+    'PaperOrient','portrait',...
+    'PaperPositionMode','auto',...
+    'IntegerHandle','off',...
+    'NumberTitle','off',...
+    'MenuBar','none',...
+    'Toolbar','none',...
+    'Name','Set Parameters',...
+    'Position',hFigPos,...
+    'HandleVisibility','on',...
+    'Tag','giparam',...
+    'CreateFcn','');...
+%    'CloseRequestFcn',gf_parameter('specr_CloseRequestFcn',gcbo,[],guidata(gcbo)),...
+%    'UserData',[]);
+% f2name = {'height','width'};
+%
+% -----------------------------------------
+% size of edit and text boxes....
+% -----------------------------------------
+f2val = [18, 40];drawparam.Name = f2val;
+f2val = [18, 60];drawparam.Value = f2val;
+f2val = [18, 60];drawparam.LB = f2val;
+f2val = [18, 60];drawparam.UB = f2val;
+f2val = [18, 60];drawparam.Hold = f2val;
+%f2val = {20, 20};drawparam.Hold = cell2struct(f2val, f2name, 2);
+setappdata(hFigGiparam,'drawparam',drawparam);
+
+% ----------------------------------------
+% Figure box default
+% ----------------------------------------
+drawsetting.gap = 2; % gap between boxes
+drawsetting.topdefault = 10;
+drawsetting.leftdefault = 10;
+setappdata(hFigGiparam,'drawsetting',drawsetting);
+
+
+function hFigGiparam = drawFigure(varargin)
+% --------------------------------
+% --- Text handles
+% --------------------------------
+%hFigGiparam, h, strname, val
+if numel(varargin) == 2
+    h_gfparameter = varargin{1};
+    param = varargin{2};
+    handle = [];
+    numofparticle = [];
+    strCompnt = [];
+elseif numel(varargin) == 5
+    h_gfparameter = varargin{1};
+    param = varargin{2};
+    handle = varargin{3};
+    numofparticle = varargin{4};
+    strCompnt = varargin{5}
+else
+    numel(varargin)
+    return;
+end
+
+[row,col] = size(param);
+hparam = zeros(size(param));
+drawparam = getappdata(h_gfparameter,'drawparam');
+fieldname = fieldnames(drawparam);
+fieldval = cell2mat(struct2cell(drawparam));
+
+drawsetting = getappdata(h_gfparameter,'drawsetting');
+gap = drawsetting.gap;
+topdefault = drawsetting.topdefault;
+leftdefault = drawsetting.leftdefault;
+
+posgifit = get(h_gfparameter, 'position');
+figheight = posgifit(4);
+figwidth = posgifit(3);
+
+for m = 1:row
+    tag = param{m, 1};
+    for n =1:col
+        funcname = strcat('mk_p', fieldname(n));
+        height = fieldval(n, 1);
+        width = fieldval(n, 2);
+        pos(2) = figheight - m*height - gap*(m-1) - topdefault;
+        pos(1) = sum(fieldval(1:n, 2)) + gap*(n-1) + leftdefault;
+        pos(3:4) = [width, height];
+        hparam(m, n) = feval(funcname{1}, h_gfparameter, pos, param{m, n}, tag, handle, numofparticle, strCompnt);
+        setappdata(hparam(m,n), 'coorddata', [m,n])
+    end
+end
+
+setappdata(handle,'txthandle', hparam);
+
+function clearFigure(handle)
+    hparam = getappdata(handle,'txthandle');
+    delete(hparam);
+
+function h = mk_pName(fighandle, pos, val, tag, varargin)
+tag = strcat(tag, '_name');
+h = uicontrol(fighandle,...
+    'Style','text',...
+    'Unit', 'pixels',...
+    'position', pos,...
+    'background', get(fighandle, 'color'),...
+    'String',num2str(val),...
+    'TooltipString',tag,...
+    'Tag',tag);
+
+function h = mk_pValue(fighandle, pos, val, tag, varargin)
+tag = strcat(tag, '_value');
+h = uicontrol(fighandle,...
+    'Style','edit',...
+    'Unit', 'pixels',...
+    'position', pos,...
+    'Background','w',...
+    'String',num2str(val),...
+    'TooltipString',tag,...
+    'callback', {@callback_editchange, varargin},...
+    'Tag',tag);
+
+function h = mk_pLB(fighandle, pos, val, tag, varargin)
+tag = strcat(tag, '_LB');
+h = uicontrol(fighandle,...
+    'Style','edit',...
+    'Unit', 'pixels',...
+    'position', pos,...
+    'Background','w',...
+    'String',num2str(val),...
+    'TooltipString',tag,...
+    'callback', {@callback_editchange, varargin},...
+    'Tag',tag);
+
+function h = mk_pUB(fighandle, pos, val, tag, varargin)
+tag = strcat(tag, '_UB');
+h = uicontrol(fighandle,...
+    'Style','edit',...
+    'Unit', 'pixels',...
+    'position', pos,...
+    'Background','w',...
+    'String',num2str(val),...
+    'TooltipString',tag,...
+    'callback', {@callback_editchange, varargin},...
+    'Tag',tag);
+
+function h = mk_pHold(fighandle, pos, val, tag, varargin)
+tag = strcat(tag, '_Hold');
+
+if val==1
+    holdornot = 'Hold';
+else
+    holdornot = 'Fit';
+end
+
+h = uicontrol(fighandle,...
+    'Style','radiobutton',...
+    'Unit', 'pixels',...
+    'position', pos,...
+    'background', get(fighandle, 'color'),...
+    'string', holdornot,...
+    'value',val,...
+    'TooltipString',tag,...
+    'callback', {@callback_pHold, varargin},...
+    'Tag',tag);
+
+function callback_pHold(hObject, eventdata, varargin)
+
+if get(hObject, 'value')
+    set(hObject, 'string', 'Hold');
+else
+    set(hObject, 'string', 'Fit');
+end
+    data = getappdata(gcbf, 'data');
+    coord = getappdata(hObject, 'coorddata');
+    data{coord(1), coord(2)} = get(hObject, 'value');
+    setappdata(gcbf, 'data', data);
+if ~isempty(varargin)
+    var = varargin{1};
+    handleoffigwheredatain = var{1};
+    numofparticle = var{2};
+    strCompnt = var{3};
+    md = get(handleoffigwheredatain, 'userdata');
+    md.particle{numofparticle}.(strCompnt).param = data;
+    set(handleoffigwheredatain, 'userdata', md);
+end
+
+
+
+function callback_editchange(hObject, eventdata, varargin)
+    data = getappdata(gcbf, 'data');
+    coord = getappdata(hObject, 'coorddata');
+    data{coord(1), coord(2)} = str2num(get(hObject, 'string'));
+    setappdata(gcbf, 'data', data);
+if ~isempty(varargin)
+    var = varargin{1};
+    handleoffigwheredatain = var{1};
+    numofparticle = var{2};
+    strCompnt = var{3};
+    md = get(handleoffigwheredatain, 'userdata');
+    md.particle{numofparticle}.(strCompnt).param = data;
+    set(handleoffigwheredatain, 'userdata', md);
+end
+    
+

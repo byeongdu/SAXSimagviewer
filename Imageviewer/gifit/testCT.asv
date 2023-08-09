@@ -1,0 +1,26 @@
+function y = testCT(particle, cut, varargin)
+% y = [chi2, y] = gf_LMA(particle, cut, varargin)
+%
+%Written by Byeongdu Lee
+if nargin<2
+    y = [];
+    return
+end
+if strcmp(particle.Fq.name, 'none')
+    yfq = 1;
+else
+    yfq = feval(particle.Fq.name, particle.Fq.param, cut, varargin);
+end
+if strcmp(particle.Sq.name, 'none')
+    ysq = 1;
+else
+    ysq = feval(particle.Sq.name, particle.Sq.param, cut, varargin);
+end
+y = 1*ysq(:);
+
+%% Calculate optical parameters
+ai = vect2row(ai)';
+af = vect2row(af)';
+tth = vect2row(tth)';
+    [qpa, q1z, q2z, q3z, q4z, Ti, Tf, Ri, Rf, tmp1,tmp2, kfz, kiz] = giQcal(ai, af, tth, eden, beta, z, sig, n, lambda);
+    zdep = 0;

@@ -1,0 +1,77 @@
+{General}
+LoadRoutineFile   = xyeload
+LoadRoutineDir    = c:\mfit\load
+LoadRoutineName   = X Y error columns text file
+FitFuncFile       = gauss
+FitFuncDir        = c:\mfit\funcs
+FitFuncName       = Gaussian
+FitRoutineFile    = mf_flsqr
+FitRoutineDir     = c:\mfit\nllsq
+FitRoutineName    = Levenberg Marquardt gradient (Fast)
+BatchFile         = temp.mbt
+BatchDir          = 
+DataFile          = unknown.dat
+DataDir           = c:\work\
+PreviousDataFile  = 
+OutFile           = temp.mft
+OutDir            = 
+FigurePosition    = 200 50
+FigureSize        = 400 350
+FigureBgColor     = gray
+AxesColor         = black
+FitColor          = blue
+EbarColor         = red
+DataColor         = green
+DataColorSelected = magenta
+MarkerSize        = 10
+DataLineStyle     = none
+AutoGuess         = 0
+AutoSave          = 0
+AutoRescale       = 
+ShowPwinAtStart   = 0
+ShowBatchShell    = 
+ExecAfterLoad     = 
+ExecAfterFit      = 
+TextBoxHeight     = 18
+AxesFont          = Times
+AxesFontSize      = 12
+LabelFont         = Times
+LabelFontSize     = 16
+ContWinPosition   = 408 606 
+ParWinPosition    = 50 50
+IniFile           = mfit.ini
+CmdBatch          = help
+ShowBatchLine     = 1
+FitPoints         = 
+{Load Routines}
+illgui    , c:\mfit\load , ILL data (new format) GUI           
+illbatch  , c:\mfit\load , ILL data (new format) Auto/Batch    
+tasgui    , c:\mfit\load , TASCOM (Riso data format) GUI       
+tasbatch  , c:\mfit\load , TASCOM (Riso data format) Auto/Batch
+specgui   , c:\mfit\load , SPEC GUI                            
+specbatch , c:\mfit\load , SPEC  Auto/Batch                    
+==Separator==========
+multigui  , c:\mfit\load , General Load routine GUI            
+multibatch, c:\mfit\load , General Load routine Auto/Batch     
+xyeload   , c:\mfit\load , X Y error columns text file         
+xyload   , c:\mfit\load , X Y columns text file         
+mf_gpar   , c:\mfit\mfit4, MFIT parameter file (v1.0)          
+frombase  , c:\mfit\load , Direct User data entry              
+{Fq Functions}
+none            , c:\analysis                       , spherefunction
+schultzspsq     , c:\analysis                       , spherefunction
+schultzCyVSq    , c:\analysis                       , GISAXS cylinder vert
+testFq          , c:\C:\mytool\GiSAXS\Gui2\gifit    , test Fq
+{Sq Functions}
+common, c:\mfit\funcs                     , Two Gaussians
+strfactor_2Dpara, c:\mfit\funcs                     , Two Gaussians
+testSq          , c:\C:\mytool\GiSAXS\Gui2\gifit    , test Fq
+{CT Functions}
+none            , c:\mfit\funcs                     , N Gaussians                        
+testCT          , c:\C:\mytool\GiSAXS\Gui2\gifit    , test Fq
+gf_LMAcluster   , c:\C:\mytool\GiSAXS\Gui2\gifit    , test Fq
+{Fit Functions}
+mf_flsqr , c:\mfit\nllsq, Levenberg Marquardt gradient (Fast)   
+mf_glsqr , c:\mfit\nllsq, Levenberg Marquardt gradient (Graphic)
+mf_simplx, c:\mfit\nllsq, Simplex (Nelder-Mead method)          
+mf_simplg, c:\mfit\nllsq, Simplex Graphic (Nelder-Mead method)  

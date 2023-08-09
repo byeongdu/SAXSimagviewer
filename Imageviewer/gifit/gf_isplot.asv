@@ -1,0 +1,17 @@
+function ret = gf_isplot(varargin)
+if isstruct(varargin{1})
+    if isfield(varargin{1}, varargin{2})
+        lineh = varargin{1}.(varargin{2});
+        figh = varargin{3};
+    else
+        disp('input is not correct format')
+    end
+else
+    lineh = varargin{1};
+    figh = varargin{2};
+end
+
+lines = findobj(figh, 'type', 'line');
+if isempty(find(lines == lineh))
+    ret
+end

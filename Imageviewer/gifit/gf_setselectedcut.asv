@@ -1,0 +1,58 @@
+function gf_setselectedcut(varargin)
+% gf_setselectedcut(linehandle)
+% this will update 'selectpnts' saved in linecuts to cut in gifit window.
+% gf_setselectedcut
+%   will update all linecuts
+% gf_setselectedcut(linehandle)
+%   will update only the linehandle provided...
+%
+    if isempty(varargin)
+        lines = findobj(findobj(0, 'tag', 'gf_uplot'), 'tag', 'data');
+        luser = get(lines, 'userdata');
+        linenum = cell2mat(luser);
+        t = [];
+        for k = 1:numel(lines)
+            if isempty(luser{k})
+                t = [t,k];
+%                linehandle(t) = lines(k);
+            end
+        end
+        lines(t) = [];
+%        luser(t) = [];
+        linehandle = lines;
+        if isempty(linehandle)
+            return
+        end
+    else
+        linehandle = varargin{1};
+    end
+
+    hgifit = findobj(0, 'tag', 'gifit');
+    cut = getappdata(hgifit, 'cut');
+    for i=1:numel(linehandle)
+%        tag = get(linehandle(i), 'tag');
+%        num = gf_findcut(tag, cut);
+        num = get(linehandle(i), 'userdata');
+        t = getappdata(linehandle(i), 'flaghandle');
+        if isempty(t)
+            cut{num}.optfit = 0;
+            sprintf('No data point from %s is selected\n', cut{num}.fn);
+            sprintf('Thus, it is not going to be fitted\n');
+        else
+            
+            selpnt.xdata = get(t, 'xdata');
+            selpnt.ydata = get(t, 'ydata');
+            setappdata(linehandle(i), 'selectpnts', selpnt);
+            if isfield(cut{num}, 'selectpnts');
+                cut{num}.selectpnts = selpnt; 
+            else
+                cut{num} = setfield(cut{num}, 'selectpnts', selpnt);
+            end
+        end
+    end
+    setappdata(hgifit, 'cut',cut);
+end
+
+function indA = data2pnts(data, flag)
+    [comm, indA] = intersect(data, flag);
+end

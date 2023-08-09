@@ -1,0 +1,17 @@
+function indx = gf_findcut(linetag, cut)
+% indx = gf_findcut(linetag, cut)
+% example : gf_findcut('sto69h.dat', cut)
+% Byeongdu Lee
+%    tag = get(linehandle(i), 'tag');
+
+    fnames = fieldnames(cut{1});
+%    k = cell(n,numel(fnames),numel(cut));
+    k = cell(numel(cut));
+    for i=1:numel(cut)
+        struct2cell(cut{i})
+        cut{i}
+        k(:,i) = struct2cell(cut{i});
+    end
+    tagp = findcellstr(fnames, 'tag');
+    tags = k(tagp, :);
+    indx = findcellstr(tags, linetag);

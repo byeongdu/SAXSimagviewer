@@ -1,0 +1,98 @@
+function R = ipfopen(filename)
+% this function is for loading imageplate binary data file.
+% image size is fixed as 4000*2000
+% header file format is still uncorrect.... later it should be checked again.
+% usage..
+% R = ipfopen(filename)
+% example : if file name is 'test.ipf' then
+% R = ipfopen('test.ipf');
+%
+% Byeongdu Lee
+% 2001. 5.
+% new?
+fid = fopen(filename, 'r');
+fseek(fid,  -1024, 1);
+
+
+datatype = 'char';
+id = fread(fid, 4, datatype)
+
+datatype = 'int32';
+
+m_type1 = fread(fid, 1, datatype)
+
+m_type2 = fread(fid, 1, datatype)
+fseek(fid,  9, 0)
+
+dtype = fread(fid, 1, datatype)
+
+break
+pixelsize = fread(fid, 1, datatype)
+pixelsize2 = fread(fid, 1, datatype)
+datatype = 'float32';
+radius = fread(fid, 1, datatype)
+
+datatype = 'int32';
+xsize = fread(fid, 1, datatype)
+ysize = fread(fid, 1, datatype)
+ipno = fread(fid, 1, datatype)
+
+datatype = 'char';
+comment = fread(fid, 80, datatype)
+
+datatype = 'float32';
+x_lambda = fread(fid, 1, datatype)
+c_dist = fread(fid, 1, datatype)
+
+datatype = 'char';
+monochro = fread(fid, 32, datatype)
+
+datatype = 'float32';
+pttheta = fread(fid, 1, datatype)
+
+datatype = 'int32';
+ipx = fread(fid, 1, datatype)
+ipy = fread(fid, 1, datatype)
+
+datatype = 'float32';
+exposure = fread(fid, 1, datatype)
+kv = fread(fid, 1, datatype)
+ma = fread(fid, 1, datatype)
+collimator = fread(fid, 1, datatype)
+coupling = fread(fid, 1, datatype)
+phi1 = fread(fid, 1, datatype)
+phi2 = fread(fid, 1, datatype)
+phispeed = fread(fid, 1, datatype)
+
+datatype = 'int32';
+repet = fread(fid, 1, datatype)
+osc_axis = fread(fid, 1, datatype)
+
+datatype = 'float32';
+g_omega = fread(fid, 1, datatype)
+g_kappa = fread(fid, 1, datatype)
+g_phi = fread(fid, 1, datatype)
+
+datatype = 'int32';
+xstart = fread(fid, 1, datatype)
+ystart = fread(fid, 1, datatype)
+
+datatype = 'float32';
+stemp = fread(fid, 1, datatype)
+sptemp = fread(fid, 1, datatype)
+ipoffset = fread(fid, 1, datatype)
+
+datatype = 'char';
+otherinfo = fread(fid, inf, datatype);
+size(otherinfo)
+
+
+%fseek(fid,  0, -1);
+
+%datatype ='int16';
+%R = fread(fid, [4000, 2000], datatype);
+
+%T = find(R < 0);
+%R(T) = R(T) + 65536;
+
+fclose(fid);

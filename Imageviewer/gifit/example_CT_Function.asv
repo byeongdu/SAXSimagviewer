@@ -1,0 +1,17 @@
+function y = gf_LMA(particle, cut, varargin)
+% y = [chi2, y] = gf_LMA(particle, cut, varargin)
+%
+%Written by Byeongdu Lee
+y = 0;
+if strcmp(particle.Fq.name, 'none')
+    yfq = 1;
+else
+    yfq = feval(particle.Fq.name, particle.Fq.param, cut, varargin);
+end
+if strcmp(particle.Sq.name, 'none')
+    ysq = 1;
+else
+    ysq = feval(particle.Sq.name, particle.Sq.param, cut, varargin);
+end
+y = yfq(:).*ysq(:);
+
