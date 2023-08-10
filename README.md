@@ -4,6 +4,6 @@
 # Installation
 ## Requirement
 1. SAXSLee package (https://github.com/byeongdu/SAXSLee)
-2. HDF5 plugin (see directions in https://12idb.xray.aps.anl.gov/Software_Processing.html)
+2. HDF5 plugin ("Installation" tab on https://12idb.xray.aps.anl.gov/Software_Processing.html)
 ## Matlab Path Setting
-Once this repository is cloned and fetched, open matlab and addpath those directories and subdirectories (if not familiar with the matlab path definition, have a look at https://12idb.xray.aps.anl.gov/Software_Processing.html).
+Once this repository is cloned and fetched, open matlab and addpath those directories and subdirectories (if not familiar with the matlab path definition, have a look at https://12idb.xray.aps.anl.gov/Software_Processing.html, Installation tab).
