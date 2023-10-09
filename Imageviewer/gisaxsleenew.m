@@ -3,7 +3,7 @@ function varargout = gisaxsleenew(varargin)
 %    FIG = SAXSLee launch untitled GUI.
 %    UNTITLED('callback_name', ...) invoke the named callback.
 
-% Last Modified by GUIDE v2.5 03-May-2020 23:32:35
+% Last Modified by GUIDE v2.5 03-Oct-2023 15:12:48
 
 if nargin == 0  % LAUNCH GUI
 
@@ -1508,7 +1508,7 @@ function pb_imganalysis_Callback(hObject, eventdata, handles)
 % hObject    handle to pb_imganalysis (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-imganalysis
+imganalysis_App
 
 
 % --- Executes on button press in pbSave1DasIS.
@@ -2841,3 +2841,11 @@ function pb_2dindexing_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 indexing2dpowder
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over rd_UpDown.
+function rd_UpDown_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to rd_UpDown (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)

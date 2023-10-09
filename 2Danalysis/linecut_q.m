@@ -74,6 +74,7 @@ wl = saxs.waveln;
     end
     Iq = Iq/Nofbw;
     cut.Iq = Iq;
+    cut.cutResolution = bw;
 % --------------------------------------------    
 
 function [cut, P] = readpnts(img, pnt, saxs)

@@ -156,7 +156,8 @@ if isgen_back
     qmap = sqrt(Ym.^2+Zm.^2);
     qindex = 0:1:(max(qmap(:))+1);
 end
-
+DATA = DATA(:);
+DATA_num = numel(DATA);
 for ind=1:1:N_img
     saxs.tthi = phi(ind);
     % Loading an image.
@@ -230,8 +231,17 @@ for ind=1:1:N_img
     % Assigning values of img into q
     ind1 = sub2ind([qxN, qxN, qxN], qxI, qyI, qzI);
     ind2 = sub2ind([qxN, qxN, qxN], qxI2, qyI2, qzI2);
-    DATA(ind1) = DATA(ind1) + img(:);
-    DATA(ind2) = DATA(ind2) + img(:);
+    % sum for each bin
+    imgsum1 = accumarray(ind1, img(:));
+    imgsum2 = accumarray(ind2, img(:));
+    imgsum1  = padarray(imgsum1, DATA_num-numel(imgsum1), 'post');
+    imgsum2  = padarray(imgsum2, DATA_num-numel(imgsum2), 'post');
+    % add binned sum to each bin.
+    DATA = DATA + imgsum1 + imgsum2;
+    %DATA(ind1) = DATA(ind1) + imgsum1;
+    %DATA(ind2) = DATA(ind2) + imgsum2;
+%    DATA(ind1) = DATA(ind1) + img(:);
+%    DATA(ind2) = DATA(ind2) + img(:);
     Npnt(ind1) = Npnt(ind1) + 1;
     Npnt(ind2) = Npnt(ind2) + 1;
     
@@ -246,8 +256,9 @@ for ind=1:1:N_img
 %     toc
     fprintf('File %i is processed\n', ind);
 end
-DATA = DATA./Npnt;
 DATA(DATA<=0) = NaN;
+DATA = reshape(DATA, size(qx0));
+DATA = DATA./Npnt;
 clear qxI qyI qzI qxI2 qyI2 qzI2 Npnt qx qy qz img
 %% Form factor removal and conditioning data.
 %figure;

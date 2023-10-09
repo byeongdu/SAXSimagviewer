@@ -1319,14 +1319,30 @@ for i=1:Nf
         if ~t.isdir
             %SAXSimageviewer(filename);
             saxs = loadimage(filename, saxs);
-            handles.saxs = saxs;
-            if avgmode == 0
-                pb_SinglefileAverage_Callback([],[], handles)
-            elseif avgmode == 1
-                pb_SinglefileAverage_Callback([],[], handles, 1)
+            if isfield(saxs, 'frame')
+                frameMax = size(saxs.image, 3);
+            else
+                frameMax = 1;
             end
-            fprintf('Azim average done for %s, %i of %i\n', listoffile{i}, i, Nf)
+            frame = 1;
+            handles.saxs = saxs;
+            while frame<=frameMax
+                handles.saxs.frame = frame;
+                if avgmode == 0
+                    pb_SinglefileAverage_Callback([],[], handles)
+                elseif avgmode == 1
+                    pb_SinglefileAverage_Callback([],[], handles, 1)
+                end
+                if frameMax>1
+                    fprintf('Azim average done for frame %i in %s, %i of %i\n', frame, listoffile{i}, i, Nf)
+                else
+                    fprintf('Azim average done for %s, %i of %i\n', listoffile{i}, i, Nf)
+                end
+                frame = frame + 1;
+            end
         end
+    else
+        fprintf('%s is not a file.\n', filename);
     end
 end
 

@@ -776,7 +776,7 @@ end
             'Label','Background',...
             'Position',3,...
             'HandleVisibility','callback',...
-            'Enable', 'off',...
+            'Enable', 'on',...
             'Tag','SSL_MenuSet');
         hMenuSetBack = uimenu(hMenuSet,...
             'Label','Set current image as Background...',...
@@ -1029,8 +1029,8 @@ end
             'callback', @call_gisaxsleenew);
         function call_gisaxsleenew(varargin)
             set(findobj('tag', 'SSL_MenuSet'), 'enable', 'on');
-            %gisaxsleenew
-            gisaxsleenew('SetSAXSValues');
+            gisaxsleenew_App;
+            %gisaxsleenew('SetSAXSValues');
         end
         nposition = 2;
         if ~isempty(which('spacegroup'))
@@ -2117,31 +2117,56 @@ imgquickmasking = ind2rgb(imgquickmasking, map);
         t = findobj('tag', 'GIImgAnalysis');
         cdn = handles.coordinate;
         if ~isempty(t)
-            analhandle = guihandles(t);    
-            if isfield(cdn, 'qtz')
-                set(analhandle.ed_qtz, 'string', num2str(cdn.qtz));
-                set(analhandle.ed_qt, 'string', num2str(cdn.qt));
+            analhandle = guihandles(t);
+            if strcmp(t.Name, 'Linecut Tool')
+                if isfield(cdn, 'qtz')
+                    analhandle.ed_qtz.Value = num2str(cdn.qtz);
+                    analhandle.ed_qt.Value = num2str(cdn.qt);
+                else
+                    analhandle.ed_qtz.Value = num2str(cdn.qz);
+                    analhandle.ed_qt.Value = num2str(cdn.q);
+                end
+                if isfield(cdn, 'qrz')
+                    analhandle.ed_qrz.Value = num2str(cdn.qrz);
+                    analhandle.ed_qr.Value = num2str(cdn.qr);
+                else
+                    analhandle.ed_qtz.Value = num2str(cdn.qz);
+                    analhandle.ed_qr.Value = num2str(cdn.q);
+                end
+                if isfield(cdn, 'qxy')
+                    analhandle.ed_qxy.Value = num2str(cdn.qxy);
+                else
+                    analhandle.ed_qxy.Value = num2str(cdn.qy);
+                end
+                analhandle.ed_af.Value = num2str(cdn.af);
+                analhandle.ed_tth.Value = num2str(cdn.tthf);
+                analhandle.ed_xpixel.Value = num2str(cdn.x);
+                analhandle.ed_ypixel.Value = num2str(cdn.y);                
             else
-                set(analhandle.ed_qtz, 'string', num2str(cdn.qz));
-                set(analhandle.ed_qt, 'string', num2str(cdn.q));
+                if isfield(cdn, 'qtz')
+                    set(analhandle.ed_qtz, 'string', num2str(cdn.qtz));
+                    set(analhandle.ed_qt, 'string', num2str(cdn.qt));
+                else
+                    set(analhandle.ed_qtz, 'string', num2str(cdn.qz));
+                    set(analhandle.ed_qt, 'string', num2str(cdn.q));
+                end
+                if isfield(cdn, 'qrz')
+                    set(analhandle.ed_qrz, 'string', num2str(cdn.qrz));
+                    set(analhandle.ed_qr, 'string', num2str(cdn.qr));
+                else
+                    set(analhandle.ed_qtz, 'string', num2str(cdn.qz));
+                    set(analhandle.ed_qr, 'string', num2str(cdn.q));
+                end
+                if isfield(cdn, 'qxy')
+                    set(analhandle.ed_qxy, 'string', num2str(cdn.qxy));
+                else
+                    set(analhandle.ed_qxy, 'string', num2str(cdn.qy));
+                end
+                set(analhandle.ed_af, 'string', num2str(cdn.af));
+                set(analhandle.ed_tth, 'string', num2str(cdn.tthf));
+                set(analhandle.ed_xpixel, 'string', num2str(cdn.x));
+                set(analhandle.ed_ypixel, 'string', num2str(cdn.y));
             end
-            if isfield(cdn, 'qrz')
-                set(analhandle.ed_qrz, 'string', num2str(cdn.qrz));
-                set(analhandle.ed_qr, 'string', num2str(cdn.qr));
-            else
-                set(analhandle.ed_qtz, 'string', num2str(cdn.qz));
-                set(analhandle.ed_qr, 'string', num2str(cdn.q));
-            end
-            if isfield(cdn, 'qxy')
-                set(analhandle.ed_qxy, 'string', num2str(cdn.qxy));
-            else
-                set(analhandle.ed_qxy, 'string', num2str(cdn.qy));
-            end
-            set(analhandle.ed_af, 'string', num2str(cdn.af));
-            set(analhandle.ed_tth, 'string', num2str(cdn.tthf));
-            set(analhandle.ed_xpixel, 'string', num2str(cdn.x));
-            set(analhandle.ed_ypixel, 'string', num2str(cdn.y));
-            
             %imganalysis('pb_coordDown_Callback');
         end
     end
@@ -2202,24 +2227,56 @@ imgquickmasking = ind2rgb(imgquickmasking, map);
         %img = get(findobj(handles.ImageAxes, 'tag', 'SAXSimageviewerImage'), 'CData');
         saxs = get(figH, 'userdata');
         img = saxs.image;
-        if ~isfield(saxs, 'qmap')
-            x = 1:saxs.imgsize(2);
-            y = 1:saxs.imgsize(1);
-            [X, Y] = meshgrid(x, y);
-            [qmap, thmap, SF, ang] = pixel2q([X(:),Y(:)], saxs);
-            saxs.qmap = qmap;
-            saxs.thmap = thmap;
-        end
         if ~isfield(saxs, 'mask')
             fprintf('Need saxs.mask.\n')
             return
-        end
+        end        
         ind = saxs.mask(:)<1;
-        val = interp2(reshape(saxs.qmap, size(img))', ...
-            reshape(saxs.thmap, size(img))', ...
-            img', saxs.qmap(ind), -saxs.thmap(ind));
+        ind = ind | isnan(saxs.mask(:));
+        
+        % new method:
+        x = 1:saxs.imgsize(2);
+        y = 1:saxs.imgsize(1);
+        [X, Y] = meshgrid(x, y);
+        if ~isfield(saxs, 'qmap')
+
+            [qmap, thmap] = pixel2q([X(:),Y(:)], saxs);
+            saxs.qmap = qmap;
+            saxs.thmap = thmap;
+        end
+        qv = saxs.qmap(ind);
+        th = rad2deg(saxs.thmap(ind)+pi);
+        P = q2pixel([qv(:),zeros(numel(qv), 1), th(:)], ...
+            saxs.waveln, saxs.center, saxs.psize, saxs.SDD, saxs.tiltangle);
+        val = interp2(X, Y, img, P(:,1), P(:,2));
+        % ==========================================
+
+        % % old method:
+        % if ~isfield(saxs, 'qmap')
+        %     x = 1:saxs.imgsize(1);
+        %     y = 1:saxs.imgsize(2);
+        %     [X, Y] = ndgrid(x, y);
+        %     [qmap, thmap, SF, ang] = pixel2q([X(:),Y(:)], saxs);
+        %     saxs.qmap = qmap;
+        %     saxs.thmap = thmap;
+        % end
+        % val = interp2(reshape(saxs.qmap, size(img))', ...
+        %     reshape(saxs.thmap, size(img))', ...
+        %     img', saxs.qmap(ind), -saxs.thmap(ind));
+        % % ==========================================
+
         img(ind)=val;
+        saxs.image = img;
+        setgihandle(saxs);
         assignin('base', 'fillimage', img);
+        handles = guidata(figH);
+        if handles.ToggleLogLin.State % log?
+            img = log10(abs(img));
+        else
+            img = abs(img);
+        end
+        set(findobj(handles.ImageAxes, 'tag', 'SAXSimageviewerImage'), 'CData', img)
+        fprintf("\n2D image is exported to base as fillimage to save.\n")
     end
     function uimenu_linecut(varargin)
         figH = evalin('base', 'SAXSimageviewerhandle');
