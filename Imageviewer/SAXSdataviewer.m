@@ -842,63 +842,7 @@ end
 
   end
 
-%--------------------------------------------------------------------------
-% showDirectory
-%   This function shows a list of image files in the directory
-%--------------------------------------------------------------------------
-  function showDirectory(dirname)
 
-    % Reset settings and images
-    stopTimer;
-    clearImageAxes;
-    %----------------------------------------------------------------------
-
-    if nargin == 1
-      handles.lastDir = dirname;
-    else
-      if isempty(handles.lastDir)
-        handles.lastDir = pwd;
-      end
-    end
-
-    set(handles.CurrentDirectoryEdit, 'string', ...
-      fixLongDirName(handles.lastDir), ...
-      'tooltipstring', handles.lastDir);
-
-    % Get image formats
-    [n, n2]= filefilter;
-    
-    if isempty(n)
-      handles.imageID = [];
-      handles.imageNames = {};
-      handles.imagePreviews = {};
-      runTimer = false;
-    else
-      handles.imageID = 1:length(n);
-      handles.imageNames = n;
-      handles.imagePreviews = cell(1,length(n));
-      runTimer = true;
-    end
-
-    if ~isempty(n2)
-      n2 = strcat(repmat({'['}, 1, length(n2)), n2, repmat({']'}, 1, length(n2)));
-      n = {n2{:}, n{:}};
-
-      handles.imageID = handles.imageID + length(n2);
-    end
-    set(handles.FileListBox, 'string', n, 'value', 1);
-
-    if runTimer
-      startTimer;
-    end
-
-    if ~isempty(handles.imageID)
-      set(handles.SAXSImageViewer, 'selectiontype', 'normal');
-      set(handles.FileListBox, 'value', handles.imageID(1));
-      fileListBoxCallback(handles.FileListBox);
-    end
-
-  end
   
     function filefiltereditCallback(varargin)
         handles.filefilter = get(varargin{1}, 'string');
@@ -912,54 +856,7 @@ end
         showDirectory
     end
         
-    function [n, n2] = filefilter
-            % Get image formats
-    imf  = imformats;
-    exts = [imf.ext];
-    d = [];
-    % check the format string....
-    if isfield(handles, 'filefilter')
-        formatstring = handles.filefilter;
-    else
-        formatstring = [];
-    end
-    
-    if isfield(handles, 'filesort')
-        sortstring = handles.filesort;
-    else
-        sortstring = 'name';
-    end
-    
-    % list files
-    if isempty(formatstring)
-        for id = 1:length(exts)
-            d = [d; dir(fullfile(handles.lastDir, ['*.' exts{id}]))];
-        end
-    else
-        d = [d; dir(fullfile(handles.lastDir, formatstring))];
-        d = d(~[d.isdir]);
-    end
 
-%    sort files;
-    if numel(d) < 2
-        n = {d.name};
-    else
-        if isstr(d(1).(sortstring))
-            [tmp, tmpind] = sort({d.(sortstring)});
-        else
-            [tmp, tmpind] = sort([d.(sortstring)]);
-        end
-        n = {d(tmpind).name};
-    end
-        
-
-    d2 = dir(handles.lastDir);
-    n2 = {d2.name};
-    n2 = n2([d2.isdir]);
-    ii1 = strmatch('.', n2, 'exact');
-    ii2 = strmatch('..', n2, 'exact');
-    n2([ii1, ii2]) = '';
-    end
 
  function colorbarCallback(varargin)
     state = get(handles.ToggleColorbar, 'state');
@@ -1075,7 +972,232 @@ end
   end
 
 %--------------------------------------------------------------------------
-% fileListBoxCallback
+% showDirectory
+%   This function shows a list of image files in the directory
+%--------------------------------------------------------------------------
+  function showDirectory(handles, dirname)
+
+    if nargin == 2
+      handles.lastDir = dirname;
+    else
+      if isempty(handles.lastDir)
+        handles.lastDir = pwd;
+      end
+    end
+
+    set(handles.CurrentDirectoryEdit,'string', fixLongDirName(handles.lastDir),'tooltipstring', handles.lastDir);
+
+    % Get image formats
+    [n, n2, handles] = filefilter(handles);
+    
+    if isempty(n)
+      handles.imageID = [];
+      handles.imageNames = {};
+      handles.imagePreviews = {};
+      runTimer = false;
+    else
+      handles.imageID = 1:length(n);
+      handles.imageNames = n;
+      handles.imagePreviews = cell(1,length(n));
+      runTimer = true;
+    end
+
+    if ~isempty(n2)
+      n2 = strcat(repmat({'['}, 1, length(n2)), n2, repmat({']'}, 1, length(n2)));
+      n = {n2{:}, n{:}};
+
+      handles.imageID = handles.imageID + length(n2);
+    end
+    set(handles.FileListBox, 'string', n, 'value', 1);
+
+    if runTimer
+      startTimer;
+    end
+
+    if ~isempty(handles.imageID)
+      set(handles.SAXSImageViewer, 'selectiontype', 'normal');
+      set(handles.FileListBox, 'value', handles.imageID(1));
+      fileListBoxCallback(handles.FileListBox);
+    end
+
+  end
+
+
+
+%--------------------------------------------------------------------------
+% showDirectory
+%   This function shows a list of image files in the directory
+%--------------------------------------------------------------------------
+  function showDirectory2(dirname)
+
+    if nargin == 2
+      handles.lastDir2 = dirname;
+    else
+      if isempty(handles.lastDir)
+        handles.lastDir2 = pwd;
+      end
+    end
+
+    set(handles.CurrentDirectoryEdit2,'string', fixLongDirName(handles.lastDir2),'tooltipstring', handles.lastDir2);
+
+    % Get image formats
+    [n, n2] = filefilter2;
+    
+    if isempty(n)
+      handles.imageID2 = [];
+      handles.imageNames2 = {};
+      handles.imagePreviews2 = {};
+      runTimer = false;
+    else
+      handles.imageID2 = 1:length(n);
+      handles.imageNames2 = n;
+      handles.imagePreviews2 = cell(1,length(n));
+      runTimer = true;
+    end
+
+    if ~isempty(n2)
+      n2 = strcat(repmat({'['}, 1, length(n2)), n2, repmat({']'}, 1, length(n2)));
+      n = {n2{:}, n{:}};
+
+      handles.imageID2 = handles.imageID2 + length(n2);
+    end
+    set(handles.FileListBox2, 'string', n, 'value', 1);
+
+    if runTimer
+      startTimer;
+    end
+
+    if ~isempty(handles.imageID2)
+      set(handles.SAXSImageViewer, 'selectiontype', 'normal');
+      set(handles.FileListBox2, 'value', handles.imageID2(1));
+      fileListBoxCallback2(handles.FileListBox2);
+    end
+
+  end
+
+
+    function [n, n2] = filefilter
+            % Get image formats
+    imf  = imformats;
+    exts = [imf.ext];
+    d = [];
+    % check the format string....
+    if isfield(handles, 'filefilter')
+        formatstring = handles.filefilter;
+    else
+        formatstring = [];
+    end
+    
+    if isfield(handles, 'filesort')
+        sortstring = handles.filesort;
+    else
+        sortstring = 'name';
+    end
+    
+    % list files
+    if isempty(formatstring)
+        for id = 1:length(exts)
+            d = [d; dir(fullfile(handles.lastDir, ['*.' exts{id}]))];
+        end
+    else
+        d = [d; dir(fullfile(handles.lastDir, formatstring))];
+        d = d(~[d.isdir]);
+    end
+
+%    sort files;
+    if numel(d) < 2
+        n = {d.name};
+    else
+        if isstr(d(1).(sortstring))
+            [tmp, tmpind] = sort({d.(sortstring)});
+        else
+            [tmp, tmpind] = sort([d.(sortstring)]);
+        end
+        n = {d(tmpind).name};
+    end
+        
+
+    d2 = dir(handles.lastDir);
+    n2 = {d2.name};
+    n2 = n2([d2.isdir]);
+    ii1 = strmatch('.', n2, 'exact');
+    ii2 = strmatch('..', n2, 'exact');
+    n2([ii1, ii2]) = '';
+    end
+
+
+
+    function [n, n2] = filefilter2
+            % Get image formats
+    imf  = imformats;
+    exts = [imf.ext];
+    d = [];
+    % check the format string....
+    if isfield(handles, 'filefilter2')
+        formatstring = handles.filefilter2;
+    else
+        formatstring = [];
+    end
+    
+    if isfield(handles, 'filesort2')
+        sortstring = handles.filesort2;
+    else
+        sortstring = 'name';
+    end
+    
+    % list files
+    if isempty(formatstring)
+        for id = 1:length(exts)
+            d = [d; dir(fullfile(handles.lastDir2, ['*.' exts{id}]))];
+        end
+    else
+        d = [d; dir(fullfile(handles.lastDir2, formatstring))];
+        d = d(~[d.isdir]);
+    end
+
+%    sort files;
+    if numel(d) < 2
+        n = {d.name};
+    else
+        if isstr(d(1).(sortstring2))
+            [tmp, tmpind] = sort({d.(sortstring2)});
+        else
+            [tmp, tmpind] = sort([d.(sortstring2)]);
+        end
+        n = {d(tmpind).name};
+    end
+        
+
+    d2 = dir(handles.lastDir2);
+    n2 = {d2.name};
+    n2 = n2([d2.isdir]);
+    ii1 = strmatch('.', n2, 'exact');
+    ii2 = strmatch('..', n2, 'exact');
+    n2([ii1, ii2]) = '';
+    end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%--------------------------------------------------------------------------
+% fileListBoxCallback for DATA0 (background)
 %   This gets called when an entry is selected in the file list box
 %--------------------------------------------------------------------------
   function fileListBoxCallback(varargin)
@@ -1105,24 +1227,38 @@ end
 
     end
 
-    %----------------------------------------------------------------------
-    % previewImageClickFcn
-    %   This loads the image when the thumbnail is double-clicked
-    %----------------------------------------------------------------------
-    function previewImageClickFcn(varargin)
+  end
+
+
+%--------------------------------------------------------------------------
+% fileListBoxCallback for DATA1 (data)
+%   This gets called when an entry is selected in the file list box
+%--------------------------------------------------------------------------
+  function fileListBoxCallback2(varargin)
+
+    obj = varargin{1};
+    stopTimer;
+    val = get(obj, 'value');
+    str = cellstr(get(obj, 'string'));
+
+    if ~isempty(str)
 
       switch get(handles.SAXSImageViewer, 'selectiontype')
+        case 'normal'   % single click - show preview
 
-        case 'open'   % double-click
+        case 'open'   % double click - open image and display
 
-          stopTimer;
-
-          handles.ImX = [];
-          loadImage(fullfile(get(handles.CurrentDirectoryEdit, 'tooltipstring'), str{val}));
-
-          startTimer;
-
+          if str{val}(1) == '[' && str{val}(end) == ']'
+            dirname = get(handles.CurrentDirectoryEdit2, 'tooltipstring');
+            newdirname = fullfile(dirname, str{val}(2:end-1));
+            showDirectory2(newdirname)
+          else
+            handles.ImX = [];
+            loadImage(fullfile(get(handles.CurrentDirectoryEdit2, 'tooltipstring'), str{val}));
+            startTimer;
+          end
       end
+
     end
 
   end
@@ -1141,6 +1277,20 @@ end
     end
 
   end
+%--------------------------------------------------------------------------
+% chooseDirectoryCallback
+%   This opens a directory selector
+%--------------------------------------------------------------------------
+  function chooseDirectoryCallback2(varargin)
+
+    stopTimer;
+    dirname = uigetdir(get(handles.CurrentDirectoryEdit, 'tooltipstring'), ...
+      'Choose Directory');
+    if ischar(dirname)
+      showDirectory2(dirname)
+    end
+
+  end
 
 %--------------------------------------------------------------------------
 % upDirectoryCallback
@@ -1153,6 +1303,20 @@ end
     dirname2 = fileparts(dirname);
     if ~isequal(dirname, dirname2)
       showDirectory(dirname2)
+    end
+
+  end
+%--------------------------------------------------------------------------
+% upDirectoryCallback
+%   This moves up the current directory
+%--------------------------------------------------------------------------
+  function upDirectoryCallback2(varargin)
+
+    stopTimer;
+    dirname = get(handles.CurrentDirectoryEdit, 'tooltipstring');
+    dirname2 = fileparts(dirname);
+    if ~isequal(dirname, dirname2)
+      showDirectory2(dirname2)
     end
 
   end

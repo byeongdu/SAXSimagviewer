@@ -73,7 +73,7 @@ end
 %| closing parenthesis.
 
 % --------------------------------------------------------------------
-function varargout = doaverage2(varargin)
+function varargout = do_average_img(varargin)
 
 img = varargin{1};
 saxs = varargin{2};
@@ -1483,10 +1483,10 @@ switch handles.uibuttongroup1.SelectedObject.Tag
         mu = eval(char(cellstr(get(handles.Selectmu, 'string'))));
         if numel(varargin) < 4
             avgmode = 0;
-            out = doaverage2(double(saxs.image)-offset, saxs, deg2rad(mu));
+            out = do_average_img(double(saxs.image)-offset, saxs, deg2rad(mu));
         else
             avgmode = varargin{4};
-            [out, ss] = doaverage2(double(saxs.image)-offset, saxs, deg2rad(mu), avgmode);
+            [out, ss] = do_average_img(double(saxs.image)-offset, saxs, deg2rad(mu), avgmode);
             if ~isempty(ss)
                 setgihandle(ss);
             end

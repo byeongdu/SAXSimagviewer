@@ -2815,7 +2815,7 @@ imgquickmasking = ind2rgb(imgquickmasking, map);
                     att = h5readatt(filename, '/', 'detectors');
                     saxs.beamline = 'NSLSII-LiX';
                 catch
-
+                    saxs.beamline = 'NSLSII-LiX';
                 end
             end
 %            end
@@ -2848,10 +2848,10 @@ imgquickmasking = ind2rgb(imgquickmasking, map);
                     end
                 end
                 if strcmp(saxs.beamline, 'NSLSII-LiX')
-                    saxs.h5entry = sprintf('/%s/primary/data/pil1M_image', fn);
+                    saxs.h5entry = sprintf('/%s/pil/data/pil1M_image', fn);
                 end
                 if strcmp(saxs.beamline, 'NSLSII-LiX-WAXS')
-                    saxs.h5entry = sprintf('/%s/primary/data/pilW2_image', fn);
+                    saxs.h5entry = sprintf('/%s/pil/data/pilW2_image', fn);
                 end
             end
         end
