@@ -1473,6 +1473,11 @@ else
     saxs = getgihandle;
 end
 
+if ndims(saxs.image)==3
+    img = saxs.image(:, :, saxs.frame);
+else
+    img = saxs.image;
+end
 offset = str2double(get(handles.ed_offset, 'string'));
 %saxs.ceilingintensity = eval(char(cellstr(get(handles.ed_maxcut, 'string'))));
 saxs.ceilingintensity = [str2double(get(handles.ed_mincut, 'string')), str2double(get(handles.ed_maxcut, 'string'))];
@@ -1483,10 +1488,10 @@ switch handles.uibuttongroup1.SelectedObject.Tag
         mu = eval(char(cellstr(get(handles.Selectmu, 'string'))));
         if numel(varargin) < 4
             avgmode = 0;
-            out = do_average_img(double(saxs.image)-offset, saxs, deg2rad(mu));
+            out = do_average_img(img-offset, saxs, deg2rad(mu));
         else
             avgmode = varargin{4};
-            [out, ss] = do_average_img(double(saxs.image)-offset, saxs, deg2rad(mu), avgmode);
+            [out, ss] = do_average_img(img-offset, saxs, deg2rad(mu), avgmode);
             if ~isempty(ss)
                 setgihandle(ss);
             end
@@ -1497,7 +1502,7 @@ switch handles.uibuttongroup1.SelectedObject.Tag
         thRange = eval(char(cellstr(get(handles.ed_thrange, 'string'))));
         qRange = getqrange(handles);
         inversion = get(handles.cb_inversion, 'value');
-        out = doaverage3(double(saxs.image)-offset, saxs, thRange, qRange, inversion);
+        out = doaverage3(img-offset, saxs, thRange, qRange, inversion);
     case 'rb_AvgModeXcorr'
         avgmode = 0;
         if get(handles.cb_applyqdq, 'value')
@@ -1512,7 +1517,7 @@ switch handles.uibuttongroup1.SelectedObject.Tag
         q2 = str2double(get(handles.ed_XCq2, 'string'));
         dq = str2double(get(handles.ed_XCdq, 'string'));
         dth = str2double(get(handles.ed_XCdth, 'string'));
-        out = Xcorr(double(saxs.image)-offset, saxs, q1, q2, dq, dth);
+        out = Xcorr(img-offset, saxs, q1, q2, dq, dth);
 end
 % Normalize and Energy correction and so on....
 ishist = 0;

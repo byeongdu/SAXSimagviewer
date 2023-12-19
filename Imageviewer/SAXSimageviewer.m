@@ -767,7 +767,7 @@ end
             'Tag','SSL_MenuPlayImages',...
             'callback',@playimages);
         
-%          uimenu(hcmenu,'Label','Set current image as Background','Callback',@uimenu_setbackground);
+%         uimenu(hcmenu,'Label','Set current image as Background','Callback',@uimenu_setbackground);
 %         uimenu(hcmenu,'Label','Set current image as Air','Callback',@uimenu_setEmpty);
 %         uimenu(hcmenu,'Label','Show Region of Interest','Callback',@uimenu_showRegionofInterest);
 %         uimenu(hcmenu,'Label','Set current image as mask','Callback',@uimenu_setmask);
@@ -921,19 +921,7 @@ end
             'Position',6,...
             'HandleVisibility','callback',...
             'Tag','SSL_MenuTool');
-        hMenuMask = uimenu(hMenuTools,...
-            'Label','Overlay a matrix "tmpmask"...',...
-            'Position',4,...
-            'HandleVisibility','callback',...
-            'Tag','SSL_MenuMask',...
-            'callback',@overlaytmp);
-
-        function overlaytmp(varargin)
-            tmpmask = evalin('base', 'tmpmask');
-            showm(tmpmask);
-        end
-
-            hMenuFitAgBH = uimenu(hMenuTools,...
+        hMenuFitAgBH = uimenu(hMenuTools,...
             'Label','Fit SAXS AgBehenate...',...
             'Position',1,...
             'HandleVisibility','callback',...
@@ -945,64 +933,73 @@ end
             'HandleVisibility','callback',...
             'Tag','SSL_MenuViewLog',...
             'callback',@gcfit);
-        hMenu2Dfit = uimenu(hMenuTools,...
-            'Label','Choose Peaks and Show ...',...
+        hMenuMask = uimenu(hMenuTools,...
+            'Label','Overlay a matrix "tmpmask"...',...
             'Position',3,...
+            'Separator', 'on',...
+            'HandleVisibility','callback',...
+            'Tag','SSL_MenuMask',...
+            'callback',@overlaytmp);
+        hMenuAreaIntegrate = uimenu(hMenuTools,...
+            'Label','Fill masked regions via inversion symmetry...',...
+            'Position',4,...
             'HandleVisibility','callback',...
             'checked','off',...
-            'Tag','SSL_Menu2Dfit',...
-            'callback',@menutools2DfitCallblack);
+            'Tag','SSL_MenuInvSym',...
+            'callback',@uimenu_applyinvsym);
         hMenuFindPeaks = uimenu(hMenuTools,...
             'Label','Find peaks ...',...
             'Position',5,...
+            'Separator', 'on',...
             'HandleVisibility','callback',...
             'checked','off',...
             'Tag','SSL_MenuFindPeaks',...
             'callback',@find2dpeaks);
         hMenu2Dfit = uimenu(hMenuTools,...
-            'Label','Draw ROIs to Fit with 2D Gaussians...',...
+            'Label','Choose Peaks and Show ...',...
             'Position',6,...
             'HandleVisibility','callback',...
             'checked','off',...
             'Tag','SSL_Menu2Dfit',...
+            'callback',@menutools2DfitCallblack);
+        hMenueditnumpnts = uimenu(hMenuTools,...
+            'Label','Show "numpnts" and add/remove...',...
+            'Position',7,...
+            'Separator', 'on',...
+            'HandleVisibility','callback',...
+            'checked','off',...
+            'Tag','SSL_Menu_edit_numpnts',...
+            'callback',@menutools_edit_numpntsCallblack);
+        hMenu2Dfit2 = uimenu(hMenuTools,...
+            'Label','2D Gaussians Fit of "numpnts"...',...
+            'Position',8,...
+            'HandleVisibility','callback',...
+            'checked','off',...
+            'Tag','SSL_Menu2Dfitnumpnts',...
+            'callback',@menutools_numpnts2DfitCallblack);
+        hMenuFitresultSave = uimenu(hMenuTools,...
+            'Label','Save "fit2dpeak" for DICVOL...',...
+            'Position',9,...
+            'HandleVisibility','callback',...
+            'checked','off',...
+            'Tag','SSL_Menufit2dpeakDICVOL',...
+            'callback',@menutools_save_fit2dpeak_DICVOL_Callblack);
+        hMenu2Dfit = uimenu(hMenuTools,...
+            'Label','Draw ROIs to Fit with 2D Gaussians...',...
+            'Position',10,...
+            'Separator', 'on',...
+            'HandleVisibility','callback',...
+            'checked','off',...
+            'Tag','SSL_Menu2Dfit',...
             'callback',@menutools_rect2DfitCallblack);
-            
-        function menutools2DfitCallblack(src,event)
-            if strcmp(src.Checked,'off')
-                src.Checked = 'on';
-                fitpeaktoggledown
-            else
-                src.Checked = 'off';
-                fitpeaktoggleup
-            end
-        end
-            
-        function menutools_rect2DfitCallblack(src,event)
-            if strcmp(src.Checked,'off')
-                src.Checked = 'on';
-                drawROIandfit_toggledown
-            else
-                src.Checked = 'off';
-                drawROIandfit_toggleup
-            end
-        end
- 
- 
         hMenuAreaIntegrate = uimenu(hMenuTools,...
             'Label','Integrate Intensities of Zoomed In Area...',...
-            'Position',5,...
+            'Position',11,...
             'HandleVisibility','callback',...
             'checked','off',...
             'Tag','SSL_MenuAreaIntegrate',...
             'callback',@uimenu_integratedintensity);
 
-        hMenuAreaIntegrate = uimenu(hMenuTools,...
-            'Label','Fill masked regions via inversion symmetry...',...
-            'Position',6,...
-            'HandleVisibility','callback',...
-            'checked','off',...
-            'Tag','SSL_MenuInvSym',...
-            'callback',@uimenu_applyinvsym);
 
         hMenuPlugin = uimenu(figH,...
             'Label','&Plugin',...
@@ -1027,6 +1024,44 @@ end
             'HandleVisibility','callback',...
             'Tag','SSL_MenuSetup',...
             'callback', @call_gisaxsleenew);
+        function overlaytmp(varargin)
+            tmpmask = evalin('base', 'tmpmask');
+            showm(tmpmask);
+        end    
+        function menutools2DfitCallblack(src,event)
+            if strcmp(src.Checked,'off')
+                src.Checked = 'on';
+                fitpeaktoggledown
+            else
+                src.Checked = 'off';
+                fitpeaktoggleup
+            end
+        end
+            
+        function menutools_rect2DfitCallblack(src,event)
+            if strcmp(src.Checked,'off')
+                src.Checked = 'on';
+                drawROIandfit_toggledown
+            else
+                src.Checked = 'off';
+                drawROIandfit_toggleup
+            end
+        end
+        function menutools_numpnts2DfitCallblack(src, event)
+            drawROIandfit_numpnts
+        end
+        function menutools_edit_numpntsCallblack(src, event)
+            if strcmp(src.Checked,'off')
+                src.Checked = 'on';
+                edit_numpnts_toggledown
+            else
+                src.Checked = 'off';
+                edit_numpnts_toggleup
+            end
+        end
+        function menutools_save_fit2dpeak_DICVOL_Callblack(src, event)
+            fit2dpeak_saveforDICVOL
+        end        
         function call_gisaxsleenew(varargin)
             set(findobj('tag', 'SSL_MenuSet'), 'enable', 'on');
             gisaxsleenew_App;
@@ -2801,32 +2836,40 @@ imgquickmasking = ind2rgb(imgquickmasking, map);
         if ~isempty(filename)
 %            if ~isfield(saxs, 'beamline')
             saxs.beamline = 'unknown';
-
-            %%% check if data is from APS 12ID %%%
-            try
-                saxs.beamline = h5read(filename, '/entry/instrument/source/facility_beamline');
-            catch
-                
-            end
-
-            %%% check if data is from LiX beamline %%%
-            if strcmp(saxs.beamline, 'unknown')
+            [~, ~, ext] = fileparts(filename);
+            if contains(ext, {'.h5', '.hdf'})
                 try
-                    att = h5readatt(filename, '/', 'detectors');
-                    saxs.beamline = 'NSLSII-LiX';
+                    att = h5readatt(filename, '/entry', 'NX_class');
                 catch
                     saxs.beamline = 'NSLSII-LiX';
                 end
-            end
-%            end
-            if contains(saxs.beamline, '12-ID')
-                saxs.h5entry = '/entry/data/data';
-            end
-            if contains(saxs.beamline, 'NSLSII-LiX')
-                dt = h5info(filename);
-                n_group = 0;
-                if numel(dt.Groups)==1
-                else
+                %%% check if data is from APS 12ID %%%
+                try
+                    saxs.beamline = h5read(filename, '/entry/instrument/source/facility_beamline');
+                catch
+                    
+                end
+    
+                %%% check if data is from LiX beamline %%%
+                if strcmp(saxs.beamline, 'unknown')
+                    try
+                        att = h5readatt(filename, '/', 'detectors');
+                        saxs.beamline = 'NSLSII-LiX';
+                    catch
+                        saxs.beamline = '12-ID';
+                    end
+                end
+    %            end
+                if contains(saxs.beamline, '12-ID')
+                    saxs.h5entry = '/entry/data/data';
+                end
+                if contains(saxs.beamline, 'NSLSII-LiX')
+                    dt = h5info(filename);
+                    n_group = 0;
+                    if numel(dt.Groups)==1
+                        %dt = dt.Groups;
+                    end
+
                     groupName = {};
                     for i=1:numel(dt.Groups)
                         %fprintf('%s\n', dt.Groups(i).Name)
@@ -2835,23 +2878,24 @@ imgquickmasking = ind2rgb(imgquickmasking, map);
                     %n_group = input('Which group you want to read? ');
                     detectors = {'SAXS', 'WAXS'};
                     [n_group, dettype] = choose_h5_groups(groupName, detectors);
-                end
-                if dettype == 1
-                    saxs.beamline = 'NSLSII-LiX';
-                else
-                    saxs.beamline = 'NSLSII-LiX-WAXS';
-                end
-                if ~isempty(filename)
-                    [~, fn, ~] = fileparts(filename);
-                    if n_group > 0
-                        fn = sprintf('%s', dt.Groups(n_group).Name);
+                    
+                    if dettype == 1
+                        saxs.beamline = 'NSLSII-LiX';
+                    else
+                        saxs.beamline = 'NSLSII-LiX-WAXS';
                     end
-                end
-                if strcmp(saxs.beamline, 'NSLSII-LiX')
-                    saxs.h5entry = sprintf('/%s/pil/data/pil1M_image', fn);
-                end
-                if strcmp(saxs.beamline, 'NSLSII-LiX-WAXS')
-                    saxs.h5entry = sprintf('/%s/pil/data/pilW2_image', fn);
+                    if ~isempty(filename)
+                        [~, fn, ~] = fileparts(filename);
+                        if n_group > 0
+                            fn = sprintf('%s', dt.Groups(n_group).Name);
+                        end
+                    end
+                    if strcmp(saxs.beamline, 'NSLSII-LiX')
+                        saxs.h5entry = sprintf('/%s/pil/data/pil1M_image', fn);
+                    end
+                    if strcmp(saxs.beamline, 'NSLSII-LiX-WAXS')
+                        saxs.h5entry = sprintf('/%s/pil/data/pilW2_image', fn);
+                    end
                 end
             end
         end
@@ -4593,6 +4637,244 @@ imgquickmasking = ind2rgb(imgquickmasking, map);
         guidata(figH, handles);
     end
 
+    function drawROIandfit_numpnts(varargin)
+        figH = evalin('base', 'SAXSimageviewerhandle');handles = guidata(figH);
+        % get the dimension of images...
+        %img0 = get(findobj(handles.ImageAxes, 'type', 'image'), 'CData');
+        saxs = getgihandle;
+        if ndims(saxs.image)==3
+            img0 = saxs.image(:,:,saxs.frame);
+        else
+            img0 = saxs.image;
+        end
+        fprintf('\n')
+        fprintf('Variable "numpnts" will be loaded from the workspace.\n')
+        numpnts = evalin('base', 'numpnts');
+        try
+            Option2Dfit = evalin('base', 'Option2Dfit');
+        catch
+            Option2Dfit.peak_xwidth = 1;
+            Option2Dfit.peak_ywidth = 2;
+            Option2Dfit.ROI = 5;
+            assignin('base', 'Option2Dfit', Option2Dfit)
+            fprintf('\n')
+            fprintf('Edit the variable, Option2Dfit, with fields peak_xwidth, peak_ywidth, ROI');
+            fprintf('For now, the default is used.');
+            fprintf('\n')
+        end
+        xw = Option2Dfit.peak_xwidth;
+        yw = Option2Dfit.peak_ywidth;
+        ROI = Option2Dfit.ROI;rx = ROI;ry=ROI;
+        % rx and ry are the half width of the image section containing the
+        % peak to fit.
+        % xw and yw are the initial values for the peak widths to fit.
+        fprintf('\n')
+        fprintf('2D Gaussian peak fit starts with ROI of %i and an initial peakwidth %0.1f.\n', ROI, xw)
+        fprintf('\n')
+        fit2dpeak = Gaussian2dfit(numpnts(:,1), numpnts(:,2), img0, ...
+            'xwidth', xw, 'ywidth', yw, 'ROIx', rx, 'ROIy', ry);
+        qpos = calcangle2q(fit2dpeak.X(:), fit2dpeak.Y(:), saxs);
+        fit2dpeak.q = qpos;
+        fit2dpeak.q_sig = fit2dpeak.param(:,4:5)*saxs.pxQ;
+        assignin('base', 'fit2dpeak', fit2dpeak);
+        fprintf('\n')
+        disp('Data fitting done')
+        fprintf('\n')
+%        disp('You can see fitted 2D as follow:')
+%        disp('[e,imgc]=fitwith2dgaussian(fit2dpeak.param, fit2dpeak.xarr,{fit2dpeak.xarr, fit2dpeak.yarr});')
+%        disp('imagesc(imgc)')
+
+        guidata(figH, handles);
+    end
+
+    function plot_numpnts(varargin)
+        if numel(varargin)==1
+            numpnts = varargin{1};
+        else
+            numpnts = evalin('base', 'numpnts');
+        end
+        delete(findobj(gcbf, 'tag', 'numpnts'))
+        k = line(numpnts(:,1), numpnts(:,2));
+        set(k, 'linestyle', 'none', 'Marker','o','MarkerEdgeColor','r', 'tag', 'numpnts')
+    end
+    function edit_numpnts_toggledown(varargin)
+        figH = evalin('base', 'SAXSimageviewerhandle');handles = guidata(figH);
+        % get current figure event functions
+        currFcn2 = get(figH, 'windowbuttondownfcn');
+    %    currTitle = get(get(gca, 'Title'), 'String');
+    % add data to figure handles
+        plot_numpnts
+
+        if (isfield(handles,'ID') && handles.ID==1)
+            disp('gtrack is already active.');
+            return;
+        else
+            handles.ID = 1;
+        end
+        if ~isfield(handles, 'selectedX')
+            handles.selectedX = [];
+            handles.selectedY = [];
+        end
+        %
+        handles.currFcn2 = currFcn2;
+        handles.theState = uisuspend(figH);
+        guidata(figH, handles);
+
+        set(gcf,'Pointer','crosshair');
+        set(gcf, 'windowbuttondownfcn', @edit_numpnts_OnMouseDown);         
+    end
+    function edit_numpnts_toggleup(varargin)
+        figH = evalin('base', 'SAXSimageviewerhandle');
+        handles = guidata(figH);
+
+        % restore default figure properties
+        set(figH, 'windowbuttondownfcn', handles.currFcn2);
+        set(figH,'Pointer','arrow');
+        %title(handles.currTitle);
+        uirestore(handles.theState);
+        handles.ID=0;
+        %    rest = 1;
+        guidata(figH, handles);        
+    end
+    function edit_numpnts_OnMouseDown(varargin)
+        figH = evalin('base', 'SAXSimageviewerhandle');handles = guidata(figH);
+        numpnts = evalin('base', 'numpnts');
+        pt = get(handles.ImageAxes, 'CurrentPoint');
+        xInd = round(pt(1, 1));
+        yInd = round(pt(1, 2));
+        switch get(handles.SAXSImageViewer, 'selectiontype')
+            case 'normal'
+                numpnts = [numpnts;[xInd, yInd]];
+                plot_numpnts(numpnts)
+            case {'extend', 'alt'}
+                [~, ind] = min(sqrt(sum((numpnts-[xInd, yInd]).^2, 2)));
+                numpnts(ind, :) = [];
+                plot_numpnts(numpnts)
+            otherwise
+        end        
+        assignin('base', 'numpnts', numpnts);
+    end
+
+    function fit2dpeak_saveforDICVOL(varargin)
+        [filename, pathname] = uiputfile('*.txt', 'Save PEAKS for DICVOL as');
+        fn = fullfile(pathname, filename);
+        saveforDICVOL(fn)
+    end
+    function saveforDICVOL(filename)
+        fit2dpeak = evalin('base', 'fit2dpeak');
+        saxs = getgihandle;
+        pixpos = [fit2dpeak.X(:), fit2dpeak.Y(:)];
+        pixpos = pixpos - saxs.center;
+        [th, r] = cart2pol(pixpos(:,1), pixpos(:,2));
+        [x, y] = pol2cart(th+pi, r);
+        
+        % pixel tolerance
+        tol = 2; % tolerance is 2 pixel;
+        N_input_peaks = numel(x);
+        % apply inversion symmetry
+        fprintf('\n')
+        fprintf('\n')
+        fprintf('Inversion symmetric position checking with tolerane %0.1f pixels.\n', tol)
+        pair = zeros(size(x));
+        for i=1:N_input_peaks
+            pos = pixpos(i, :);
+            posn = [x, y] - pos;
+            d = sqrt(sum(posn.^2, 2));
+            if any(d<tol)
+                indx = find(d<tol);
+                while numel(indx)>1
+                    tol = tol-0.2;
+                    fprintf('Tolerane is reduced to %f pixels.\n', tol)
+                    indx = find(d<tol);
+                end
+                pair(i) = indx;
+            end
+        end
+        cen_shift = zeros(sum(pair>0), 2);
+        N_pairs = size(cen_shift, 1)/2;
+        fprintf('\n')
+        fprintf('Total %i pairs are found.\n', N_pairs)
+        k = 1;
+        for i=1:N_input_peaks
+            if pair(i)>0
+                pos = pixpos(i, :);
+                posn = pixpos(pair(i), :);
+                cen_shift(k,:) = (pos+posn)/2;
+                k = k+1;
+            end
+        end
+        fprintf('\n')
+        fprintf('From the pairs, the beam center devication is estimated as: \n')
+        fprintf('   Beamcenter shifted by X_c = %0.5f and Y_c = %0.5f\n', mean(cen_shift, 1))
+        fprintf('   Standard deviation: [X_c]s = %0.5f, [Y_c]s = %0.5f\n', std(cen_shift, 1))
+        % modifying beamcenter ==============================
+        pixpos = pixpos - mean(cen_shift, 1);
+        saxs.center = [0, 0];
+        qpos = calcangle2q(pixpos(:,1), pixpos(:,2), saxs);
+        fit2dpeak.q = qpos;
+        % ===================================================
+
+        fit2dpeak.pix = sqrt(pixpos(:,1).^2+pixpos(:,2).^2);
+        fit2dpeak.pix = fit2dpeak.pix(:);
+
+        % Merge all peaks that have pixel distance within the tolerance
+
+        pix = fit2dpeak.pix;
+        q = fit2dpeak.q;
+        q_sig = fit2dpeak.q_sig;
+
+        q = sqrt(sum(q.^2,2));
+        q_sig = sqrt(sum(q_sig.^2,2));
+        % sorting....
+        [pd, ic] = sort(pix);
+        k = 1;
+        peakindex = {};
+        ind = ic(1);
+
+        for i=2:numel(pd)
+            if pd(i)-pd(i-1)>tol
+%                p0 = pd(i);
+                peakindex{k} = ind;
+                k = k+1;
+                ind = ic(i);
+            else
+                ind = [ind, ic(i)];
+            end
+        end
+        qv = zeros(numel(peakindex), 1);
+        qv_sig = qv;
+        for i=1:numel(peakindex)
+            qv(i) = mean(q(peakindex{i}));
+            qv_sig(i) = mean(q_sig(peakindex{i}));
+        end
+        N_peaks = numel(qv);
+        fprintf('\n')
+        fprintf('Total %i inputs are reduced to %i.\n', N_input_peaks, N_peaks)
+        fprintf('\n')
+        fprintf('\n')
+        % convert to d-spacing and save for DICVOL.
+        m = [2*pi./qv, qv_sig./qv];
+        m = sort(m, 1, 'descend');
+        maxd = m(1, 1);
+        f = 1/maxd*5;
+        maxd = maxd*f;
+        m(:,1) = m(:,1)*f;
+        sig = m(:,2);
+        Npeak = length(m(:,1));
+        %[~, b,ext] = fileparts(filename);
+        %fn = [b, ext];
+        fid = fopen(filename, 'w');
+        fprintf(fid, '**** Scale factor %0.5e ****\n', f);
+        fprintf(fid, '%i  %s\n', Npeak, '3 1 1 1 1 0 0');
+        fprintf(fid, '%0.3f %0.3f %0.3f 0.0 %0.3f 0 0\n', maxd*3, maxd*3, maxd*3, 5*maxd^3);
+        fprintf(fid, '%s\n', '0 0 0 0');
+        fprintf(fid, '%s\n', '1.0 0 0 0 0');
+        for i=1:Npeak
+            fprintf(fid, '%0.3f %0.3f\n', m(i, 1), sig(i)*m(i, 1));
+        end
+        fclose(fid);
+
+    end
     function ppos = find2dpeaks(varargin)
         saxs = getgihandle;
 %         % method 1: peak2dfind
@@ -4612,21 +4894,54 @@ imgquickmasking = ind2rgb(imgquickmasking, map);
 
         % method 2: FastPeakfind
         img = saxs.image;
+        if ndims(img)==3
+            img = img(:, :, saxs.frame);
+        end
         if isfield(saxs, 'mask')
             img = img.*saxs.mask;
         end
-        filt = (fspecial('gaussian', 7,3));
+        filt = (fspecial('gaussian', 21,3));
         cent = FastPeakFind(img, 2, filt, 2, 1);
         ppos = reshape(cent, 2, numel(cent)/2)';
-        k = line(ppos(:,1), ppos(:,2)); 
-        set(k, 'linestyle', 'none', 'Marker','s','MarkerEdgeColor','r')
+        %k = line(ppos(:,1), ppos(:,2)); 
+        %set(k, 'linestyle', 'none', 'Marker','s','MarkerEdgeColor','r')
+
+        %% will need to remove peaks that are not relevant....
+        ROI = 5;
+        ind2go = [];
+        for i=1:size(ppos, 1)
+            p = ppos(i, :);
+            x = fix(p(1))-ROI:fix(p(1))+ROI;
+            y = fix(p(2))-ROI:fix(p(2))+ROI;
+            y(y>size(img, 2) | y<1) = [];
+            x(x>size(img, 2) | x<1) = [];
+            [~, xi] = min(abs(x-p(1)));
+            [~, yi] = min(abs(y-p(2)));
+            dt = img(y, x);dt(yi-1:yi+1, xi-1:xi+1) = NaN;
+            dt = dt(:); dt(isnan(dt)) = [];
+            mv = mean(dt(:));
+            if img(p(2), p(1))<mv*3
+                ind2go = [ind2go, i];
+            end
+        end
+        ppos(ind2go, :) = [];
+        k2 = line(ppos(:,1), ppos(:,2)); 
+        assignin('base', 'numpnts', ppos)
+        set(k2, 'linestyle', 'none', 'Marker','o','MarkerEdgeColor','r')
     end
 
     function qpos = calcangle2q(varargin)
         xInd = varargin{1};
         yInd = varargin{2};
         saxs = varargin{3};
-        ai = saxs.ai;
+        if isfield(saxs, 'ai')
+            ai = saxs.ai;
+        else
+            ai = 0;
+        end
+        if ~isfield(saxs, 'SDD')
+            error('The setup file may not be loaded yet.')
+        end
         try
             %ang = pixel2angle2([xInd, yInd], saxs.center, saxs.SDD, psize, ta);
             Pixel = bsxfun(@minus, [xInd, yInd], saxs.center);
@@ -4647,8 +4962,6 @@ imgquickmasking = ind2rgb(imgquickmasking, map);
                 isgisaxs = 0;
             end
         end
-        
-
 
         switch isgisaxs
             case 1
