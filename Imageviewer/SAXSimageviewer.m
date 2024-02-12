@@ -13,8 +13,6 @@ function SAXSimageviewer(varargin)
 %   centering view (double-clicking).
 %
 
-% Copyright 2006 The MathWorks, Inc.
-
 % VERSIONS:
 %   v1.0 - first version. (was pictureviewer.m)
 %   v1.1 - convert to nested functions. (Nov 13, 2006)
@@ -766,6 +764,21 @@ end
             'HandleVisibility','callback',...
             'Tag','SSL_MenuPlayImages',...
             'callback',@playimages);
+        
+        hMenuPlayImage = uimenu(hMenuView,...
+            'Label','Play multiframe data...',...
+            'Position',6,...
+            'Separator', 'on',...
+            'HandleVisibility','callback',...
+            'Tag','SSL_MenuPlayImages',...
+            'callback',@playframes);
+        
+        hMenuPlayImage = uimenu(hMenuView,...
+            'Label','Jump frame to...',...
+            'Position',7,...
+            'HandleVisibility','callback',...
+            'Tag','SSL_MenuPlayImages',...
+            'callback',@moveframeto);
         
 %         uimenu(hcmenu,'Label','Set current image as Background','Callback',@uimenu_setbackground);
 %         uimenu(hcmenu,'Label','Set current image as Air','Callback',@uimenu_setEmpty);
@@ -2137,11 +2150,12 @@ imgquickmasking = ind2rgb(imgquickmasking, map);
         if isfield(cdn, 'qtz')
             z = cdn.qtz/cdn.qt;
             y = cdn.qy/cdn.qt;
-            fprintf('Coordinates are [0, %0.3f, %0.3f]\n', y, z)
+            fprintf('q/|q_t| are [0, %0.3f, %0.3f]\n', y, z)
         else
             z = cdn.qz/cdn.q;
             y = cdn.qy/cdn.q;
-            fprintf('Coordinates are [0, %0.3f, %0.3f]\n', y, z)
+            fprintf('q coordinate is [0, %0.3f, %0.3f] and q=%0.4f\n', cdn.qy, cdn.qz, cdn.q)
+            fprintf('q/|q| are [0, %0.3f, %0.3f]\n', y, z)
         end
 
             %imganalysis('pb_coordDown_Callback');
@@ -3877,17 +3891,7 @@ imgquickmasking = ind2rgb(imgquickmasking, map);
             end
         end
 
-%         figPos = get(gcbf, 'position');
-%         pos = [300, figPos(4)-85]
-%        pos(1) = xlimvalue(1)+fix(abs(xlimvalue(2)-xlimvalue(1))*0.02);
-%        pos(2) = ylimvalue(2)-fix(abs(ylimvalue(2)-ylimvalue(1))*0.1);
-%        pAxis = get(handles.ImageAxes, 'position');
-%        pDisplayInfo = get(handles.DisplayInfo, 'position');
-%         pos(1) = xlimvalue(1)-fix(abs(xlimvalue(2)-xlimvalue(1))*0.1)*2
-%         pos(2) = ylimvalue(2)+fix(abs(ylimvalue(2)-ylimvalue(1))*0.1)
-%         pos(1) = pAxis(1)-pDisplayInfo(1)+100;
-%         pos(2) = 1400;
-        
+       
         try
             pos_valuestr = ['X = ', num2str(xInd,handles.titleFmt), ...
                 ', Y = ', num2str(yInd,handles.titleFmt), ...
@@ -4083,6 +4087,8 @@ imgquickmasking = ind2rgb(imgquickmasking, map);
         end
 
         %    rest = 1;
+        set(handles.DisplayInfo, 'visible', 'off')
+        set(handles.DisplayCoordInfo, 'visible', 'off')
         guidata(figH, handles);
     end
 % terminate callback
@@ -4117,7 +4123,8 @@ imgquickmasking = ind2rgb(imgquickmasking, map);
         guidata(figH, handles);
 
     % set event functions 
-
+        set(handles.DisplayInfo, 'visible', 'on');
+        set(handles.DisplayCoordInfo, 'visible', 'on')
         set(gcf,'Pointer','crosshair');
         set(gcf, 'windowbuttonmotionfcn', @gtrack_OnMouseMove);        
         set(gcf, 'windowbuttondownfcn', @gtrack_OnMouseDown);          
@@ -4463,6 +4470,31 @@ imgquickmasking = ind2rgb(imgquickmasking, map);
     
     end
 
+    function playframes(varargin)
+        figH = evalin('base', 'SAXSimageviewerhandle');
+        saxs = getgihandle;
+        %handles = guidata(figH);
+        %str = get(handles.FileListBox, 'string');
+        for i=saxs.frame:1:size(saxs.image, 3)
+            flipHDFright
+            pause(0.2)
+        end
+    
+    end
+
+    function moveframeto(varargin)
+        prompt = {'Enter a frame number to go'};
+        dlgtitle = 'Frame jump';
+        fieldsize = [1 40];
+        definput = {'50'};
+        opts.Interpreter = 'tex';
+        answer = inputdlg(prompt,dlgtitle,fieldsize,definput,opts);
+        s = getgihandle;
+        s.frame = str2double(answer{1})-1;
+        setgihandle(s);
+        flipHDFright
+    end
+
     function agbhSAXScalibrate(varargin)
         figH = evalin('base', 'SAXSimageviewerhandle');handles = guidata(figH);
         saxs = getgihandle;
@@ -4769,7 +4801,7 @@ imgquickmasking = ind2rgb(imgquickmasking, map);
         [x, y] = pol2cart(th+pi, r);
         
         % pixel tolerance
-        tol = 2; % tolerance is 2 pixel;
+        tol = 10; % tolerance is 2 pixel;
         N_input_peaks = numel(x);
         % apply inversion symmetry
         fprintf('\n')
@@ -4786,8 +4818,12 @@ imgquickmasking = ind2rgb(imgquickmasking, map);
                     tol = tol-0.2;
                     fprintf('Tolerane is reduced to %f pixels.\n', tol)
                     indx = find(d<tol);
+                    fprintf('Multiple peaks are in the proximity:\n')
+                    disp(indx)
                 end
-                pair(i) = indx;
+                if numel(indx)==1
+                    pair(i) = indx;
+                end
             end
         end
         cen_shift = zeros(sum(pair>0), 2);
@@ -4808,6 +4844,9 @@ imgquickmasking = ind2rgb(imgquickmasking, map);
         fprintf('   Beamcenter shifted by X_c = %0.5f and Y_c = %0.5f\n', mean(cen_shift, 1))
         fprintf('   Standard deviation: [X_c]s = %0.5f, [Y_c]s = %0.5f\n', std(cen_shift, 1))
         % modifying beamcenter ==============================
+        if any(isnan(cen_shift))
+            cen_shift(isnan(cen_shift)) = 0;
+        end
         pixpos = pixpos - mean(cen_shift, 1);
         saxs.center = [0, 0];
         qpos = calcangle2q(pixpos(:,1), pixpos(:,2), saxs);
