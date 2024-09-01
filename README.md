@@ -1,7 +1,7 @@
 # SAXSimagviewer
 A matlab tools for image visualization and reduction of APS 12ID data
-![SAXSimageviewer](/blob/main/images/SAXSimageviewer.PNG)
-![gisaxsleenew](https://github.com/byeongdu/SAXSimagviewer/images/gisaxsshop.PNG)
+![SAXSimageviewer](images/SAXSimageviewer.PNG)
+![gisaxsleenew](images/gisaxsshop.PNG)
 
 # Installation
 ## Requirement
