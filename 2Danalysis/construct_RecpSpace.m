@@ -33,7 +33,7 @@ if isfield(files, 'maskfilename')
     mask = double(mask_org(ROIY, ROIX));
     mask = logical(mask);
 else
-    mask = true(numel(ROIX), numel(ROIY));
+    mask = true(numel(ROIY), numel(ROIX));
 end
 
 if isfield(files, 'backgroundfilename')
@@ -69,7 +69,7 @@ for ind=1:1:N_img
         else
             fname = fullfile(inp_data.dirname, files.folder, fn);
         end
-        [~, img] = openccdfile(fname, [], ext(2:end));
+        [~, img] = openccdfile(fname, saxs, ext(2:end));
         img = flipud(img);
     catch
         fprintf('File %s does not exist. Skipping.\n', fn);
@@ -85,7 +85,18 @@ for ind=1:1:N_img
     catch
         inp_data.phi(ind) = files.phi(ind);
     end
-    imga(:, :, ind) = img(ROIY, ROIX);
+    if size(img, 3)>1
+        if isfield(files, 'frameN')
+            if files.frameN == 0
+                img = sum(img, 3);
+            else
+                img = img(:,:,files.frameN);
+            end
+        else
+            error('The variable img has a multiple frames. Define "frameN" for the array "files".')
+        end
+    end
+    imga(ROIY, ROIX, ind) = img(ROIY, ROIX);
 end
 inp_data.img_mtrx = imga;
 [Qv, DATA] = construct_RecpSpace_fromImgMtrx(inp_data, saxs, ROIX, ROIY, qN, qmax);

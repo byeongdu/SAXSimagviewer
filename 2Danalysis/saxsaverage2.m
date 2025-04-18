@@ -1832,14 +1832,16 @@ function CB_add2plot_Callback(hObject, eventdata, handles)
 
 function plotandsavecut(out, saxs, handles)
 FN = saxs.imgname;
-if isfield(saxs, 'h5entry')
-    h5entry = saxs.h5entry;
-    h5entry = replace(h5entry, '//', '');
-    h5entry = replace(h5entry, '/', '_');
-    FN = sprintf('%s_%s', FN, h5entry);
-end
-if isfield(saxs, 'frame')
-    FN = sprintf('%s_%i', FN, saxs.frame);
+if ndims(saxs.image)==3
+    if isfield(saxs, 'h5entry')
+        h5entry = saxs.h5entry;
+        h5entry = replace(h5entry, '//', '');
+        h5entry = replace(h5entry, '/', '_');
+        FN = sprintf('%s_%s', FN, h5entry);
+    end
+    if isfield(saxs, 'frame')
+        FN = sprintf('%s_%i', FN, saxs.frame);
+    end
 end
 switch handles.uibuttongroup1.SelectedObject.Tag
     case 'rb_AvgModeQ'

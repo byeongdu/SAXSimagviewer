@@ -126,13 +126,13 @@ function [P, TTHF, AF, qv] = qhkl2pixel_tiltdetector(q_modulus, azimangle, detec
             pixel = pixN2Pixel(pixN, detector_angle);
             if ai==0
                 P = pixel;
-                TTHF = tthf*180/pi;
-                AF = af*180/pi;
+                TTHF = tthf;
+                AF = af;
                 return
             else
                 P{k}=pixel;
-                TTHF{k}=tthf*180/pi;
-                AF{k} = af*180/pi;
+                TTHF{k}=tthf;
+                AF{k} = af;
             end
         end        
         %
@@ -216,8 +216,6 @@ is3Dpowder = 0;
         [TTHF, AF] = pixN2angles(pixN);
 % %         P = v2P(v1,v2,v3, detector_angle, SDD, psize);
 % %         [tthf, af] = v2angle(v1, v2, v3);
-%         TTHF = tthf*180/pi;
-%         AF = af*180/pi;
         return
     else
         if ~isempty(azimangle)
@@ -254,8 +252,8 @@ is3Dpowder = 0;
             Pix = pixN2Pixel(pixN, SDD, psize, detector_angle);
             [tthf, af] = pixN2angles(pixN);
 %            [tthf, af] = v2angle(v1, v2, v3);
-            TTHF{i}=tthf*180/pi;
-            AF{i} = af*180/pi;
+            TTHF{i}=tthf;
+            AF{i} = af;
             P{i} = Pix;
         end
     end

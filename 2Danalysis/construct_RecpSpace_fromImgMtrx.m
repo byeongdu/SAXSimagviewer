@@ -1,4 +1,4 @@
-function [Qv, DATA] = construct_RecpSpace_fromImgMtrx(inp_data, saxs, ROIX, ROIY, qN, qmax)
+function [Qv, DATA] = construct_RecpSpace_fromImgMtrx(inp_data, saxs, ROIX, ROIY, qN, qmax, useraxes)
 % inp_data.img_mtrx
 % inp_data.phi
 % inp_data.norm_factor
@@ -15,6 +15,21 @@ end
 if nargin < 6
     qmax = [];
 end
+if nargin < 7
+    useraxes = 'scattering'; 
+end
+
+if strcmp(useraxes, 'scattering')
+% The standard x-ray scattering convention : [row, column, depth] of an image
+% indicates [z, -y, x]
+    useraxes = 'z-yx';
+elseif strcmp(useraxes, 'imaging') % or a synchrotron convention.
+    useraxes = '-y-xz';
+    % this is the imaging convention, those are axes for [row, column, depth].
+end
+
+fprintf('As for coordination, the row, column, and depth of an image correspond to axes %s, respectively.\n', useraxes);
+
 if isempty(qN)
     qN = 400;
 end
@@ -67,25 +82,67 @@ saxs.center = [0, 0];
 
 %% Coordinates of an image
 % laboratory coordinates
-[Y, Z] = meshgrid(ROIX, ROIY);
-if isfliped
+% switch useraxes
+%     case '-y-xz'
+%         [Y, X] = ndgrid(ROIY, ROIX);
+%         if isfliped
+%             Y = flipud(Y);
+%         end
+% 
+%         Xm = X - center(1);
+%         Ym = Y - center(2);
+%         Ym0 = -Ym(:);
+%         Xm0 = -Xm(:);
+%         Ym = Xm0;
+%         Zm = Ym0;
+%     case 'yzx'
+%         [Y, Z] = meshgrid(ROIX, ROIY);
+%         if isfliped
+%             Z = flipud(Z);
+%         end
+% 
+%         Ym = Y - center(1);
+%         Zm = Z - center(2);
+%         Zm = Zm(:);
+%     case '-yzx'
+%         [Y, Z] = meshgrid(ROIX, ROIY);
+%         if isfliped
+%             Z = flipud(Z);
+%         end
+% 
+%         Ym = Y - center(1);
+%         Zm = Z - center(2);
+%         Zm = Zm(:);
+%         Ym = -Ym(:);  % for the right hand coordination system. 
+%         % in the right hand coordination system, phi direction is counter clockwise
+%         % direction when viewed from top.
+% end
+[Y, Z] = meshgrid(ROIX, ROIY); % meshgrid makes colums Y, and rows Z.
+if isfliped % if the image is flipped vertically.
     Z = flipud(Z);
 end
 
-Ym = Y - center(1);
-Zm = Z - center(2);
+Ym = Y - center(1);  % column
+Zm = Z - center(2);  % row
 Zm = Zm(:);
 Ym = -Ym(:);  % for the right hand coordination system. 
-% in the right hand coordination system, phi direction is counter clockwise
-% direction when viewed from top.
+
+if ~isfield(saxs, 'pxQ')
+    saxs.pxQ = 4*pi/saxs.waveln*sin(1/2*atan(saxs.psize/saxs.SDD));
+end
+if ~isfield(saxs, 'tiltangle')
+    saxs.tiltangle = 0;
+end
+
+% In the right hand coordination system, phi direction is counter clockwise
+% direction when viewed from top
+q = pixel2qv([Ym(:), Zm(:)], saxs);
 
 img_sum = zeros(size(Y));
-
 
 % default q max.
 if isempty(qmax)
     saxs.tthi = 0;
-    q = pixel2qv([Ym(:), Zm(:)], saxs);
     qx = q.qx;
     qy = q.qy;
     qp = sqrt(qx.^2 + qy.^2);
@@ -101,12 +158,7 @@ qxmax = qmax;
 deltaq = (qxmax - qxmin)/qxN;
 qymin = qxmin;
 qzmin = qxmin;
-if ~isfield(saxs, 'pxQ')
-    saxs.pxQ = 4*pi/saxs.waveln*sin(1/2*atan(saxs.psize/saxs.SDD));
-end
-if ~isfield(saxs, 'tiltangle')
-    saxs.tiltangle = 0;
-end
+
 if deltaq < saxs.pxQ
     deltaq = saxs.pxQ;
     qxN = fix((qxmax - qxmin)/deltaq);
@@ -126,6 +178,7 @@ qzN = numel(z);
 DATA = zeros(size(qx0));
 Npnt = DATA;
 clear x y z
+
 %% Process data
 if isfield(inp_data, 'mask')
     mask = inp_data.mask;
@@ -179,10 +232,35 @@ for ind=1:1:N_img
 
     % Calculate q maps.
     [q, AreaFactor] = pixel2qv([Ym(:), Zm(:)], saxs);
-    qx = q.qx;
-    qy = q.qy;
-    qz = q.qz;
-    
+
+    %% definition of user's XYZ coordination system.
+    % standard x-ray scattering convention :
+    %   x : beam direction
+    %   y : outboard direction
+    %   z : up direction 
+    % standard x-ray imaging convention :
+    %   x : outboard direction
+    %   y : up direction
+    %   z : beam direction 
+    switch useraxes
+        case '-y-xz'
+            qx = q.qy;
+            qy = q.qz;
+            qz = q.qx;
+%                Qv = [qz0, qx0, qy0];
+        case 'z-yx'
+            qx = q.qx;
+            qy = q.qy;
+            qz = q.qz;
+        case 'zyx'
+            qx = q.qx;
+            qy = -q.qy;
+            qz = q.qz;
+        otherwise
+            qx = q.qx;
+            qy = q.qy;
+            qz = q.qz;
+    end    
     
     % Normalize "img" for each phi
     img = img/norm_factor(ind);
@@ -219,7 +297,9 @@ for ind=1:1:N_img
     t =  t | qxI2>qxN | qxI2 < 1 | qyI2 > qxN | qyI2 < 1 | qzI2 > qzN | qzI2 < 1; 
     t = t | ~isreal(qzI);
     t = t | ~isreal(qzI2);
-    t = t | (mask(:) < 1);
+    if ~isempty(mask)
+        t = t | (mask(:) < 1);
+    end
     img(t) = [];
     qxI(t) = [];
     qyI(t) = [];
@@ -276,4 +356,5 @@ qz0 = qz0(:);
 % qy0(t) = [];
 % qz0(t) = [];
 % DATA(t) = [];
+
 Qv = [qx0, qy0, qz0];
