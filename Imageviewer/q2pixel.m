@@ -40,7 +40,7 @@ if numel(varargin) < 8
 else
     isSAXS = 0;
 end
-
+Laue = [];
 if isSAXS
     if numel(varargin) < 6
         tiltang = [0 0 0];
@@ -49,13 +49,16 @@ if isSAXS
             tiltang = varargin{6};
         end
     end
+    if numel(varargin)==7
+        Laue = varargin{7};
+    end
 else
     if ~isempty(varargin{9})
         tiltang = varargin{9};
     end
 end
 
-if numel(tiltang) == 1
+if isscalar(tiltang)
     detector_tiltangle = [0,0,tiltang];
 else
     detector_tiltangle = tiltang;
@@ -69,7 +72,11 @@ end
 if isSAXS
     if isempty(azim)
         [af, ~, tthf, ~] = qz2af(qz, qp, 0, 0, 0, waveln);
-        t = isLaue([qp(:), qz(:)], [2*pi/waveln, 0, 0]);
+        if isempty(Laue)
+            t = isLaue([qp(:), qz(:)], [2*pi/waveln, 0, 0]);
+        else
+            t = Laue;
+        end
         af(~t) = NaN;
         tthf(~t) = NaN;
         a = angles2pixel(tthf, af, waveln, sdd, pixelsize, detector_tiltangle);
@@ -86,7 +93,12 @@ else
     ai = varargin{8};
     if isempty(azim)
         [af1, af2, tth1, tth2] = qz2af(qz, qp, ai, edensity, 0, waveln);
-        t = isLaue([qp(:), qz(:)], [2*pi/waveln, 0, 0]);
+        %t = isLaue([qp(:), qz(:)], [2*pi/waveln, 0, 0]);
+        if isempty(Laue)
+            t = isLaue([qp(:), qz(:)], [2*pi/waveln, 0, 0]);
+        else
+            t = Laue;
+        end
         af1(~t) = NaN;
         tth1(~t) = NaN;
         af2(~t) = NaN;
