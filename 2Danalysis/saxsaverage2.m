@@ -1134,7 +1134,8 @@ function pbAzim_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 %hSAXSlee=findobj('Tag','GISAXSLee');
 %saxs=get(hSAXSlee, 'Userdata');
-set(handles.Selectmu, 'string', '[-10 10; 170, 190]');
+%set(handles.Selectmu, 'string', '[-10 10; 170, 190]');
+set(handles.Selectmu, 'string', '[80 100; 260, 280]');
 
 function show_sectoravg_azim(handles)
 
@@ -1154,13 +1155,17 @@ end
 imgsize = saxs.imgsize;
 imgFigurehandle = saxs.imgfigurehandle;
 azimhandle = [];
+q = linspace(saxs.qMin, saxs.qMax, saxs.qNum);
 for i=1:1:t
     for j=1:2
         azimangle = mu(i,j); %:mu(i,2)
         %azimangle = j;
         figure(imgFigurehandle);hold on;
-        [x, y] = azimang2coord(imgsize(1), imgsize(2), center(1), center(2), azimangle);
-        tt=plot(x,y);
+        %[x, y] = azimang2coord(imgsize(1), imgsize(2), center(1), center(2), azimangle);
+        azim = mu(i,j);
+        p = q2pixel([q(:), zeros(size(q(:))), azim*ones(size(q(:)))], saxs.waveln, saxs.center, saxs.psize, saxs.SDD);
+        %tt=plot(x,y);
+        tt = plot(p(:,1), p(:,2));
         azimhandle = [azimhandle,tt];
     end
 end
@@ -1183,7 +1188,8 @@ function pbazimclear_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 %hSAXSlee=findobj('Tag','GISAXSLee');
 %saxs=get(hSAXSlee, 'Userdata');
-set(handles.Selectmu, 'string', '[80 100; 260, 280]');
+%set(handles.Selectmu, 'string', '[80 100; 260, 280]');
+set(handles.Selectmu, 'string', '[-10 10; 170, 190]')
 
 function ed_histfile_Callback(hObject, eventdata, handles)
 % hObject    handle to ed_histfile (see GCBO)

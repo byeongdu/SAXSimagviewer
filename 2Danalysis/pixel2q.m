@@ -1,5 +1,11 @@
 function [q, th, AreaFactor, ang] = pixel2q(varargin)
 % [q, th] = pixel2q(pix, center, sdd, pixelsize, detector_tiltangle, lambda)
+%   sdd in mm
+%   pixelsize in mm
+%   detector_tiltangle in degree
+%   lambda in Angstrom, which qives you q in A-1.
+%   if lambda in nm, q will be in nm-1.
+%
 % [q, th] = pixel2q(pix, saxs)
 % convert pixel(x, y) to q in polar coordinate (q, th)
 % Byeongdu lee
@@ -28,7 +34,7 @@ Pixel = bsxfun(@minus, pix, center);
 ang = [tthf(:), af(:)];
 Pixel = pixN2Pixel(pixN, sdd, pixelsize, detector_tiltangle);
 
-R = angle2vect(repmat([1, 0, 0], length(pixN), 1), pixN);
+R = angle2vect(repmat([1, 0, 0], size(pixN,1), 1), pixN);
 q = angle2q(R*180/pi, lambda);
 th = cart2pol(Pixel(:,1), Pixel(:,2));
 
@@ -42,7 +48,7 @@ if sum(detector_tiltangle.^2) ==0
     P = sqrt(Pixel(:,1).^2+Pixel(:,2).^2+L0^2);% distance between sample and a pixel.
     AreaFactor = omegafactor*P.^3/L0^3;
 else
-    if length(detector_tiltangle)==1
+    if isscalar(detector_tiltangle)
         pitch = 0;
         yaw = 0;
     else

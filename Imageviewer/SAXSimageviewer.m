@@ -4937,7 +4937,7 @@ imgquickmasking = ind2rgb(imgquickmasking, map);
         %[~, b,ext] = fileparts(filename);
         %fn = [b, ext];
         fid = fopen(filename, 'w');
-        fprintf(fid, '**** Scale factor %0.5e ****\n', f);
+        fprintf(fid, '**** with factor %0.5e ****\n', f);
         fprintf(fid, '%i  %s\n', Npeak, '3 1 1 1 1 0 0');
         fprintf(fid, '%0.3f %0.3f %0.3f 0.0 %0.3f 0 0\n', maxd*3, maxd*3, maxd*3, 5*maxd^3);
         fprintf(fid, '%s\n', '0 0 0 0');

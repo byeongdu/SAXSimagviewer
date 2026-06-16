@@ -125,9 +125,9 @@ end
             pv = 1;
         end
         if sv == 0.51
-            f = -0.1;
-        elseif sv == 0.49
             f = 0.1;
+        elseif sv == 0.49
+            f = -0.1;
         else
             f = pv*(sv-0.5)/0.5*0.05;
         end

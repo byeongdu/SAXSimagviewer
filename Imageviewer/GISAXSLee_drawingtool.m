@@ -272,7 +272,7 @@ if get(hObject,'Value')
     ai = saxs.ai;
     ta = saxs.tiltangle;
     cnt = saxs.center;
-    if numel(ta) == 1
+    if isscalar(ta)
         ta = [0,0,ta];
     end
     ang = [0, 0];
@@ -296,7 +296,7 @@ if get(hObject,'Value')
         end
     end
     hSAXSimageview = evalin('base', 'SAXSimagehandle');
-    h = line(P(:,1), P(:,2), 'parent', hSAXSimageview);
+    h = line(P(:,1)+saxs.center(1), P(:,2)+saxs.center(2), 'parent', hSAXSimageview);
     set(h, 'color', 'w', 'linestyle', '-');
     set(hObject, 'userdata', h)
 else

@@ -6,7 +6,9 @@ function [Qv, DATA] = construct_RecpSpace_fromImgMtrx(inp_data, saxs, ROIX, ROIY
 % inp_data.isfliped
 % inp_data.background
 % inp_data.gen_back
-%
+% inp_data.apply_inversion
+% inp_data.Lorentz_factor = 1 (for qxy)
+
 % mask = double(mask_org(ROIY, ROIX));
 % img_mtrx(:,:,n) = img(ROIY, ROIX);
 if nargin < 5
@@ -26,6 +28,18 @@ if strcmp(useraxes, 'scattering')
 elseif strcmp(useraxes, 'imaging') % or a synchrotron convention.
     useraxes = '-y-xz';
     % this is the imaging convention, those are axes for [row, column, depth].
+end
+
+if isfield(inp_data, 'apply_inversion')
+    apply_inversion = inp_data.apply_inversion;
+else
+    apply_inversion = 0;
+end
+
+if isfield(inp_data, 'Lorentz_factor')
+    is_LF_required = inp_data.Lorentz_factor;
+else
+    is_LF_required = 0;
 end
 
 fprintf('As for coordination, the row, column, and depth of an image correspond to axes %s, respectively.\n', useraxes);
@@ -81,42 +95,6 @@ saxs.center = [0, 0];
 % background = 35;
 
 %% Coordinates of an image
-% laboratory coordinates
-% switch useraxes
-%     case '-y-xz'
-%         [Y, X] = ndgrid(ROIY, ROIX);
-%         if isfliped
-%             Y = flipud(Y);
-%         end
-% 
-%         Xm = X - center(1);
-%         Ym = Y - center(2);
-%         Ym0 = -Ym(:);
-%         Xm0 = -Xm(:);
-%         Ym = Xm0;
-%         Zm = Ym0;
-%     case 'yzx'
-%         [Y, Z] = meshgrid(ROIX, ROIY);
-%         if isfliped
-%             Z = flipud(Z);
-%         end
-% 
-%         Ym = Y - center(1);
-%         Zm = Z - center(2);
-%         Zm = Zm(:);
-%     case '-yzx'
-%         [Y, Z] = meshgrid(ROIX, ROIY);
-%         if isfliped
-%             Z = flipud(Z);
-%         end
-% 
-%         Ym = Y - center(1);
-%         Zm = Z - center(2);
-%         Zm = Zm(:);
-%         Ym = -Ym(:);  % for the right hand coordination system. 
-%         % in the right hand coordination system, phi direction is counter clockwise
-%         % direction when viewed from top.
-% end
 [Y, Z] = meshgrid(ROIX, ROIY); % meshgrid makes colums Y, and rows Z.
 if isfliped % if the image is flipped vertically.
     Z = flipud(Z);
@@ -155,7 +133,7 @@ qxN = qN;
 
 qxmin = -qmax;
 qxmax = qmax;
-deltaq = (qxmax - qxmin)/qxN;
+deltaq = (qxmax - qxmin)/(qxN-1);
 qymin = qxmin;
 qzmin = qxmin;
 
@@ -171,6 +149,7 @@ end
 x = linspace(qxmin, qxmax, qxN);
 y = linspace(qxmin, qxmax, qxN);
 z = linspace(qxmin, qxmax, qxN);
+deltaq = x(2)-x(1);
 z(z<qzmin) = [];
 qzN = numel(z);
 
@@ -262,6 +241,11 @@ for ind=1:1:N_img
             qz = q.qz;
     end    
     
+    if is_LF_required == 1 % qxy
+        qxy = sqrt(qx.^2+qy.^2);
+        qxy = reshape(qxy, size(img));
+        img = img.*qxy;
+    end
     % Normalize "img" for each phi
     img = img/norm_factor(ind);
     img = img./reshape(AreaFactor, size(img));
@@ -289,14 +273,20 @@ for ind=1:1:N_img
     qxI = fix((qx-qxmin)/deltaq)+1;
     qyI = fix((qy-qymin)/deltaq)+1;
     qzI = fix((qz-qzmin)/deltaq)+1;
-    qxI2 = fix((-qx-qxmin)/deltaq)+1;
-    qyI2 = fix((-qy-qymin)/deltaq)+1;
-    qzI2 = fix((-qz-qzmin)/deltaq)+1;
+    if apply_inversion
+        qxI2 = fix((-qx-qxmin)/deltaq)+1;
+        qyI2 = fix((-qy-qymin)/deltaq)+1;
+        qzI2 = fix((-qz-qzmin)/deltaq)+1;
+    end
     % Remove points that are out of the qmap matrix.
     t = qxI>qxN | qxI < 1 | qyI > qxN | qyI < 1 | qzI > qzN | qzI < 1;
-    t =  t | qxI2>qxN | qxI2 < 1 | qyI2 > qxN | qyI2 < 1 | qzI2 > qzN | qzI2 < 1; 
+    if apply_inversion
+        t =  t | qxI2>qxN | qxI2 < 1 | qyI2 > qxN | qyI2 < 1 | qzI2 > qzN | qzI2 < 1; 
+    end
     t = t | ~isreal(qzI);
-    t = t | ~isreal(qzI2);
+    if apply_inversion
+        t = t | ~isreal(qzI2);
+    end
     if ~isempty(mask)
         t = t | (mask(:) < 1);
     end
@@ -304,27 +294,32 @@ for ind=1:1:N_img
     qxI(t) = [];
     qyI(t) = [];
     qzI(t) = [];
-    qxI2(t) = [];
-    qyI2(t) = [];
-    qzI2(t) = [];
-
+    if apply_inversion
+        qxI2(t) = [];
+        qyI2(t) = [];
+        qzI2(t) = [];
+    end
     % Assigning values of img into q
     ind1 = sub2ind([qxN, qxN, qxN], qxI, qyI, qzI);
-    ind2 = sub2ind([qxN, qxN, qxN], qxI2, qyI2, qzI2);
+    if apply_inversion
+        ind2 = sub2ind([qxN, qxN, qxN], qxI2, qyI2, qzI2);
+    end
     % sum for each bin
     imgsum1 = accumarray(ind1, img(:));
-    imgsum2 = accumarray(ind2, img(:));
+    if apply_inversion
+        imgsum2 = accumarray(ind2, img(:));
+    end
     imgsum1  = padarray(imgsum1, DATA_num-numel(imgsum1), 'post');
-    imgsum2  = padarray(imgsum2, DATA_num-numel(imgsum2), 'post');
+    if apply_inversion
+        imgsum2  = padarray(imgsum2, DATA_num-numel(imgsum2), 'post');
+    end
     % add binned sum to each bin.
-    DATA = DATA + imgsum1 + imgsum2;
-    %DATA(ind1) = DATA(ind1) + imgsum1;
-    %DATA(ind2) = DATA(ind2) + imgsum2;
-%    DATA(ind1) = DATA(ind1) + img(:);
-%    DATA(ind2) = DATA(ind2) + img(:);
+    DATA = DATA + imgsum1;
     Npnt(ind1) = Npnt(ind1) + 1;
-    Npnt(ind2) = Npnt(ind2) + 1;
-    
+    if apply_inversion
+         DATA = DATA + imgsum2;
+        Npnt(ind2) = Npnt(ind2) + 1;
+    end
 %     tic
 %     % Assigning values of img into q
 %     for k = 1:numel(img)

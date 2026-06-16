@@ -14,7 +14,7 @@ switch length(detangle)
     case 0
         roll = 0;
     case 1
-        roll = detangle(1);
+        roll = detangle(1)*pi/180;
     case 3
         pitch = detangle(1)*pi/180;
         yaw = detangle(2)*pi/180;
