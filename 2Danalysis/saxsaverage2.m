@@ -1134,8 +1134,8 @@ function pbAzim_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 %hSAXSlee=findobj('Tag','GISAXSLee');
 %saxs=get(hSAXSlee, 'Userdata');
-%set(handles.Selectmu, 'string', '[-10 10; 170, 190]');
-set(handles.Selectmu, 'string', '[80 100; 260, 280]');
+set(handles.Selectmu, 'string', '[-10 10; 170, 190]');
+%set(handles.Selectmu, 'string', '[80 100; 260, 280]');
 
 function show_sectoravg_azim(handles)
 
@@ -1188,8 +1188,8 @@ function pbazimclear_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 %hSAXSlee=findobj('Tag','GISAXSLee');
 %saxs=get(hSAXSlee, 'Userdata');
-%set(handles.Selectmu, 'string', '[80 100; 260, 280]');
-set(handles.Selectmu, 'string', '[-10 10; 170, 190]')
+set(handles.Selectmu, 'string', '[80 100; 260, 280]');
+%set(handles.Selectmu, 'string', '[-10 10; 170, 190]')
 
 function ed_histfile_Callback(hObject, eventdata, handles)
 % hObject    handle to ed_histfile (see GCBO)
